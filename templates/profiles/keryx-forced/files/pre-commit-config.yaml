@@ -15,3 +15,9 @@ repos:
         entry: python3 scripts/check_doc_impact.py --staged
         language: system
         pass_filenames: false
+
+      - id: keryx-sync
+        name: Keryx mirrored project state
+        entry: python3 scripts/check_keryx_sync.py --staged
+        language: system
+        pass_filenames: false

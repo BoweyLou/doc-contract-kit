@@ -11,6 +11,14 @@ If this is all new to you, adopt it in layers.
 5. Add CI enforcement when the local flow feels understandable.
 6. Later, add generated docs and executable doc tests.
 
+## Forced Keryx mode
+
+Use the `keryx-forced` profile only for repositories where Keryx should be the
+mandatory cockpit for backlog, architecture, plan, and handoff state.
+
+In that mode, Keryx writes a staged-state receipt and pre-commit blocks the
+commit if the receipt is missing or stale.
+
 ## Start small
 
 Pick one repository first.

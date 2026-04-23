@@ -1,0 +1,49 @@
+{
+  "required_files": [
+    "README.md",
+    "templates/common/documentation-contract.md",
+    "templates/common/AGENTS.md"
+  ],
+  "doc_paths": [
+    "README.md",
+    "docs/",
+    "templates/common/",
+    "templates/profiles/",
+    "skills/"
+  ],
+  "ignore_paths": [
+    "tests/",
+    "examples/"
+  ],
+  "impact_rules": {
+    "checker": [
+      "scripts/check_doc_impact.py",
+      "scripts/check_keryx_sync.py"
+    ],
+    "installer": [
+      "scripts/install.py"
+    ],
+    "profiles": [
+      "templates/profiles/"
+    ]
+  },
+  "category_doc_paths": {
+    "checker": [
+      "README.md",
+      "docs/",
+      "templates/common/documentation-contract.md",
+      "templates/common/AGENTS.md",
+      "templates/profiles/"
+    ],
+    "installer": [
+      "README.md",
+      "docs/",
+      "templates/common/"
+    ],
+    "profiles": [
+      "README.md",
+      "docs/",
+      "templates/profiles/"
+    ]
+  }
+}

@@ -11,6 +11,7 @@ If you change code, you must consider whether documentation also needs to change
 - `README.md` — high-level overview and getting started
 - `docs/` — project documentation
 - `docs/adr/` — architecture decision records
+- `doc-contract.json` — repository-specific documentation impact rules
 - `.github/pull_request_template.md` — PR checklist and change classification
 
 ## Documentation contract
@@ -26,6 +27,7 @@ If you change any of the following, update the relevant docs in the same change:
 - architecture or major design decisions
 
 If no documentation update is needed, explicitly say why in the PR summary.
+Use the exact marker `No docs needed: <reason>`.
 
 ## ADR rules
 

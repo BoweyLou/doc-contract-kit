@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "mode": "forced",
+  "repo_head": "HEAD before the commit being prepared",
+  "staged_tree_hash": "sha256 of staged project files excluding .keryx/sync.json",
+  "docs_hash": "sha256 of configured mirror paths",
+  "mirror_paths": [
+    "README.md",
+    "AGENTS.md",
+    "docs/backlog.md",
+    "docs/architecture.md",
+    "docs/plan.md",
+    "docs/documentation-contract.md"
+  ],
+  "staged_files": [],
+  "receipt_path": ".keryx/sync.json",
+  "synced_at": "2026-01-01T00:00:00+00:00",
+  "keryx_vault_target": "Configure this to the Keryx project note or vault path for this repo.",
+  "source": "keryx"
+}

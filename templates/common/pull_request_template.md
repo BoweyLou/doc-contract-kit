@@ -22,9 +22,9 @@ Describe what changed.
 - [ ] Migration notes added
 - [ ] No docs needed
 
-If no docs were updated, explain why:
+If no docs were updated, explain why using this exact marker:
 
-<!-- Required if "No docs needed" is checked -->
+No docs needed: <!-- Required if "No docs needed" is checked -->
 
 ## Verification
 

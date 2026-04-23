@@ -65,6 +65,20 @@ Examples:
 Even in these cases, the PR must explicitly state:
 `No docs needed: <reason>`
 
+The documentation impact checker accepts that marker from the PR body, or from
+the `DOC_CONTRACT_NO_DOCS_NEEDED` environment variable for local/CI adapters.
+
+## Repository-specific rules
+
+Documentation impact rules live in `doc-contract.json`.
+
+Use that file to define:
+- which files are required for the docs contract
+- which paths count as documentation
+- which paths are ignored
+- which source paths imply API, CLI, config, or operations impact
+- which documentation paths are expected for each impact category
+
 ## Generated documentation
 
 Generated docs must never be edited manually unless the repo explicitly says otherwise.

@@ -30,4 +30,6 @@ jobs:
         run: make docs-generate
 
       - name: Check documentation impact
+        env:
+          DOC_CONTRACT_PR_BODY: ${{ github.event.pull_request.body }}
         run: python3 scripts/check_doc_impact.py

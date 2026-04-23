@@ -44,10 +44,23 @@ Then inside the target repo:
 make docs-check
 ```
 
+If the target repo uses pre-commit hooks:
+
+```bash
+pre-commit install
+```
+
+To install the forced Keryx cockpit profile:
+
+```bash
+python3 scripts/install.py /path/to/target/repo --profile keryx-forced
+```
+
 ## What gets installed
 
 The starter kit currently installs:
 
+- `doc-contract.json`
 - `AGENTS.md`
 - `docs/documentation-contract.md`
 - `docs/adr/0000-template.md`
@@ -56,6 +69,48 @@ The starter kit currently installs:
 - `.pre-commit-config.yaml`
 - `Makefile`
 - `scripts/check_doc_impact.py`
+
+The default profile is `minimal`, which keeps the repo portable and does not
+assume a local knowledge-base tool.
+
+The `keryx-forced` profile also installs:
+
+- `.keryx/config.json`
+- `.keryx/sync.example.json`
+- `docs/backlog.md`
+- `docs/architecture.md`
+- `docs/plan.md`
+- `scripts/check_keryx_sync.py`
+- a stricter `AGENTS.md`
+- a Keryx-aware `Makefile`
+- a pre-commit config that runs both the docs contract and Keryx sync receipt checks
+
+## Configuration
+
+`doc-contract.json` lets each target repository customize:
+
+- required documentation contract files
+- paths that count as documentation
+- ignored paths such as tests
+- source paths that imply documentation impact
+- expected documentation paths for each impact category
+
+The checker fails when it detects doc-impacting changes without matching
+documentation updates. If a change genuinely needs no docs, the PR body must
+include `No docs needed: <reason>`, or CI/local automation must provide
+`DOC_CONTRACT_NO_DOCS_NEEDED`.
+
+## Forced Keryx profile
+
+Use `--profile keryx-forced` when Keryx should be the mandatory operating
+surface for backlog, architecture, plan, and handoff state.
+
+In that profile, the repository still keeps a one-to-one Markdown mirror of the
+Keryx state so fresh clones and CI can see the same context. Commits are blocked
+locally unless `.keryx/sync.json` matches the current staged tree and configured
+mirror docs.
+
+See `docs/keryx-forced-profile.md` for the expected lifecycle.
 
 ## Recommended rollout
 
@@ -83,6 +138,14 @@ See:
 - `docs/concepts-for-beginners.md`
 - `docs/rollout-guide.md`
 - `docs/roadmap.md`
+
+## Development
+
+Run the test suite with:
+
+```bash
+python3 -m unittest discover -s tests
+```
 
 ## Development status
 

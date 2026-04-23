@@ -10,7 +10,9 @@
 ## v0.2
 
 - upgrade script
-- stronger path classification
+- configurable path classification
+- explicit no-docs-needed declaration support
+- forced Keryx profile for mirrored backlog, architecture, plan, and sync receipts
 - example repos with more realism
 - installer tests
 
@@ -19,7 +21,7 @@
 - generated docs integration
 - executable docs checks
 - stack-aware template profiles
-- Hermes skill automation
+- Hermes/Keryx skill automation
 
 ## v0.4
 

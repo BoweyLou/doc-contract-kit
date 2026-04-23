@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "mode": "forced",
+  "receipt_path": ".keryx/sync.json",
+  "require_receipt_staged": true,
+  "keryx_vault_target": "Configure this to the Keryx project note or vault path for this repo.",
+  "mirror_paths": [
+    "README.md",
+    "AGENTS.md",
+    "docs/backlog.md",
+    "docs/architecture.md",
+    "docs/plan.md",
+    "docs/documentation-contract.md"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "keryx-forced",
+  "description": "Forced Keryx cockpit profile with mirrored backlog, architecture, plan, and sync receipt checks.",
+  "files": [
+    {
+      "source": "files/pre-commit-config.yaml",
+      "target": ".pre-commit-config.yaml"
+    },
+    {
+      "source": "files/AGENTS.md",
+      "target": "AGENTS.md"
+    },
+    {
+      "source": "files/Makefile",
+      "target": "Makefile"
+    },
+    {
+      "source": "files/keryx-config.json",
+      "target": ".keryx/config.json"
+    },
+    {
+      "source": "files/keryx-sync.example.json",
+      "target": ".keryx/sync.example.json"
+    },
+    {
+      "source": "../../../scripts/check_keryx_sync.py",
+      "target": "scripts/check_keryx_sync.py"
+    },
+    {
+      "source": "files/backlog.md",
+      "target": "docs/backlog.md"
+    },
+    {
+      "source": "files/architecture.md",
+      "target": "docs/architecture.md"
+    },
+    {
+      "source": "files/plan.md",
+      "target": "docs/plan.md"
+    }
+  ]
+}
