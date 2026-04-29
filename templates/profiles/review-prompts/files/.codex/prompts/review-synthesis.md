@@ -13,12 +13,22 @@ Inputs:
 Mission:
 Turn overlapping agent findings into one defensible action plan.
 
+Default stance:
+- Optimize for signal, not coverage.
+- Suppress nits unless they carry correctness, security, documentation, or
+  delivery risk.
+- Keep the final blocker list short enough for a human to act on.
+- Preserve local-first evidence: commands, files inspected, and docs/test
+  checks run from the checkout.
+
 Steps:
 1. Normalize each finding into priority, area, evidence, impact, recommendation, and verification.
 2. Merge duplicates. Preserve the strongest evidence and note which personas agreed.
 3. Downgrade claims that lack file evidence, command output, or runtime observation.
 4. Separate confirmed defects from improvement opportunities.
 5. Group fixes into small batches with clear ownership and low merge risk.
+6. Assign each finding a disposition: open, accepted, rejected, fixed, deferred, or duplicate.
+7. If a finding is rejected or deferred, record the reason so later runs do not rediscover it as noise.
 
 Output:
 
@@ -26,8 +36,8 @@ Output:
 - 3-5 bullets describing the overall health of the repo.
 
 ## Findings
-| Priority | Area | Finding | Evidence | Fix |
-| --- | --- | --- | --- | --- |
+| Priority | Area | Finding | Evidence | Fix | Disposition |
+| --- | --- | --- | --- | --- | --- |
 
 ## Remediation Batches
 For each batch:
@@ -43,5 +53,10 @@ List findings that depend on product intent, public API compatibility, migration
 
 ## Not Recommended
 List suggested changes you are rejecting because they are speculative, too broad, or unsupported by evidence.
-```
 
+## Session Receipt
+Summarize the local receipt fields that should be written to
+`session-receipt.json`: agent tool, mode, changed files, files inspected,
+commands run, docs-impact result, TDD red/green evidence, findings, and final
+disposition.
+```

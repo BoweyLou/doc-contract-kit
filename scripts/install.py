@@ -16,20 +16,30 @@ PRESETS = {
     "minimal": ["minimal"],
     "learning": ["minimal", "review-prompts"],
     "test-first": ["minimal", "test-first"],
-    "agentic": ["minimal", "review-prompts", "test-first"],
-    "strict-agentic": ["minimal", "review-prompts", "test-first", "keryx-forced"],
+    "agentic": ["minimal", "local-agentic", "review-prompts", "test-first"],
+    "strict-agentic": ["minimal", "local-agentic", "review-prompts", "test-first", "keryx-forced"],
 }
 
 FILE_MAP = {
     "doc-contract.json": "doc-contract.json",
     "AGENTS.md": "AGENTS.md",
+    "REVIEW.md": "REVIEW.md",
     "documentation-contract.md": "docs/documentation-contract.md",
     "adr-template.md": "docs/adr/0000-template.md",
     "pull_request_template.md": ".github/pull_request_template.md",
     "docs-workflow.yml": ".github/workflows/docs.yml",
     "pre-commit-config.yaml": ".pre-commit-config.yaml",
     "Makefile": "Makefile",
+    "session-receipt.schema.json": "schemas/session-receipt.schema.json",
+    "persona-manifest.schema.json": "schemas/persona-manifest.schema.json",
+    "safe-output.schema.json": ".agent-workflows/schemas/safe-output.schema.json",
 }
+
+CORE_SCRIPTS = [
+    "check_doc_impact.py",
+    "lint_agent_docs.py",
+    "localize_doc_impact.py",
+]
 
 
 def ensure_git_repo(target: Path):
@@ -184,9 +194,10 @@ def main():
         if copy_file(TEMPLATES / src_name, dst, args.force):
             written_targets.add(dst)
 
-    check_doc_dst = target / "scripts/check_doc_impact.py"
-    if copy_file(ROOT / "scripts" / "check_doc_impact.py", check_doc_dst, args.force):
-        written_targets.add(check_doc_dst)
+    for script_name in CORE_SCRIPTS:
+        script_dst = target / "scripts" / script_name
+        if copy_file(ROOT / "scripts" / script_name, script_dst, args.force):
+            written_targets.add(script_dst)
 
     for profile in profiles:
         install_profile_files(profile, target, args.force, written_targets)
@@ -207,6 +218,8 @@ def main():
         print("  run make agent-review or make agent-learn when you want agent guidance")
     if "test-first" in profiles:
         print("  review docs/testing-strategy.md and .codex/prompts/tdd/ before the next behavior change")
+    if "local-agentic" in profiles:
+        print("  run make agent-docs-lint and make agent-docs-localize for local-only agent checks")
     print("  git status")
 
 

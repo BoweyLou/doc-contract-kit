@@ -8,9 +8,9 @@ If this is all new to you, adopt it in layers.
 2. Get used to AGENTS.md and the documentation contract.
 3. Start running `make docs-check` locally.
 4. Add `--preset learning` when you want review and learning prompts in the repo.
-5. Add `--preset test-first` or `--preset agentic` when you want executable-spec prompts.
-6. Add hooks if you want faster feedback.
-7. Add CI enforcement when the local flow feels understandable.
+5. Add `--preset test-first` or `--preset agentic` when you want executable-spec prompts and local agent workflows.
+6. Add hooks if you want faster local feedback.
+7. Add CI adapters only if your host supports them. The core workflow must still run locally.
 8. Later, add generated docs and executable doc tests.
 
 ## Forced Keryx mode
@@ -29,13 +29,15 @@ prompts, and forced Keryx profile together.
 After install, use these target-repo commands:
 
 - `make docs-check`
+- `make agent-docs-lint`
+- `make agent-docs-localize`
 - `make agent-review`
 - `make agent-learn`
 - `make agent-test-first`
 - `make agent-verify`
 
-The agent commands print the prompt path to use. They deliberately avoid binding
-the repository to one agent runtime.
+The agent commands print the local workflow or prompt path to use. They
+deliberately avoid binding the repository to one agent runtime.
 
 ## Start small
 

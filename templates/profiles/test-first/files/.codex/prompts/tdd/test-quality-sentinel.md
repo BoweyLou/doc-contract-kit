@@ -20,12 +20,14 @@ Checks:
 - Are snapshots meaningful and reviewed?
 - Are tests deterministic and scoped to the changed behavior?
 - Do docs and tests agree on expected behavior?
+- Is generated-test provenance recorded when an agent wrote or shaped tests?
+- Is there a clear exception reason when no red/green evidence exists?
 
 Output:
 - Verdict: pass, pass with caveats, or fail.
 - Tests that provide real regression value.
 - Weak tests or false confidence.
 - Missing high-value tests.
+- Red/green receipt completeness.
 - Required fixes before merge.
 ```
-

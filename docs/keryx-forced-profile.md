@@ -3,9 +3,9 @@
 The `keryx-forced` profile is for repositories where Keryx is the mandatory
 working cockpit for backlog, architecture, plan, and handoff state.
 
-The repository remains the durable mirror. The mirror lets GitHub, CI, Codex,
-Claude Code, and fresh clones read the same state even when they cannot access
-the local Keryx workspace directly.
+The repository remains the durable mirror. The mirror lets fresh clones, local
+checks, Codex, AmpCode, Claude Code, and other local agents read the same state
+even when they cannot access the local Keryx workspace directly.
 
 ## Installed Files
 
@@ -17,9 +17,14 @@ The profile installs:
 - `docs/architecture.md`
 - `docs/plan.md`
 - `scripts/check_keryx_sync.py`
+- `scripts/lint_agent_docs.py`
+- `scripts/localize_doc_impact.py`
+- `REVIEW.md`
+- `.agent-workflows/`
 - a Keryx-aware `Makefile`
 - a Keryx-aware `AGENTS.md`
-- a pre-commit config with both doc-contract and Keryx sync checks
+- a local-only pre-commit config with doc-contract, Keryx sync, and agent
+  instruction checks
 
 ## Commit Lifecycle
 

@@ -28,12 +28,16 @@ Rules:
 - Keep unit, integration, contract, and e2e tests at the smallest useful level.
 - Update docs when public behavior, CLI, API, config, data contracts, or operations change.
 - Preserve unrelated user changes.
+- Capture red/green evidence. If no failing test is practical, explain why
+  before changing production code.
 
 Output:
 - Behavior slices covered.
 - Tests added or changed.
+- Failing test command and result before implementation, or exception reason.
+- Passing test command and result after implementation.
+- Generated-test provenance if the agent wrote or substantially shaped a test.
 - Implementation files changed.
 - Verification commands and results.
 - Remaining behavior not yet covered.
 ```
-

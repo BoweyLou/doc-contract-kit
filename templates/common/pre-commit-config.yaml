@@ -1,17 +1,14 @@
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: check-merge-conflict
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-      - id: check-yaml
-      - id: check-added-large-files
-
   - repo: local
     hooks:
       - id: doc-contract
         name: documentation contract
         entry: python3 scripts/check_doc_impact.py --staged
+        language: system
+        pass_filenames: false
+
+      - id: agent-instruction-lint
+        name: local agent instruction lint
+        entry: python3 scripts/lint_agent_docs.py --strict-paths
         language: system
         pass_filenames: false

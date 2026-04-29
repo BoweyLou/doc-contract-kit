@@ -9,6 +9,7 @@ It is designed for agent-heavy development, where code can change quickly and do
 - templates for repo-local documentation guardrails
 - a lightweight documentation impact checker
 - a simple installer for bootstrapping another repository
+- local-first agent workflow files that work without GitHub Actions or hosted CI
 - beginner-friendly docs explaining PRs, CI, hooks, ADRs, and agent instructions
 - a Hermes skill stub for later automation
 
@@ -44,10 +45,17 @@ For the opinionated agentic setup:
 python3 scripts/install.py /path/to/target/repo --preset agentic
 ```
 
+The `agentic` preset is local-first and agent-tool agnostic. It can be used from
+AmpCode, Codex, Claude Code, Aider, Cline, or a manual shell workflow. It does
+not require GitHub Actions and is suitable for locked-down on-prem Git servers
+such as older Bitbucket deployments.
+
 Then inside the target repo:
 
 ```bash
 make docs-check
+make agent-docs-lint
+make agent-docs-localize
 make agent-review
 make agent-test-first
 ```
@@ -83,7 +91,8 @@ Presets are the easiest way to install a coherent operating mode:
 - `minimal`: documentation contract only.
 - `learning`: documentation contract plus review and learning prompts.
 - `test-first`: documentation contract plus TDD/executable-spec prompts.
-- `agentic`: documentation contract, review prompts, learning prompts, and test-first prompts.
+- `agentic`: documentation contract, local agent workflows, review prompts,
+  learning prompts, and test-first prompts.
 - `strict-agentic`: `agentic` plus the forced Keryx cockpit profile.
 
 ## What gets installed
@@ -92,6 +101,7 @@ The starter kit currently installs:
 
 - `doc-contract.json`
 - `AGENTS.md`
+- `REVIEW.md`
 - `docs/documentation-contract.md`
 - `docs/adr/0000-template.md`
 - `.github/pull_request_template.md`
@@ -99,6 +109,9 @@ The starter kit currently installs:
 - `.pre-commit-config.yaml`
 - `Makefile`
 - `scripts/check_doc_impact.py`
+- `scripts/lint_agent_docs.py`
+- `scripts/localize_doc_impact.py`
+- `.agent-workflows/schemas/safe-output.schema.json`
 
 The default profile is `minimal`, which keeps the repo portable and does not
 assume a local knowledge-base tool.
@@ -122,6 +135,16 @@ The `review-prompts` profile also installs:
 - `.codex/prompts/personas/`
 - `.codex/prompts/templates/`
 - remediation and verification prompts
+
+The `local-agentic` profile also installs:
+
+- `.agent-workflows/README.md`
+- `.agent-workflows/repo-review.md`
+- `.agent-workflows/tdd-red-green-receipt.md`
+- `.agent-workflows/schemas/session-receipt.schema.json`
+
+Use this profile when the repo must work with local tools only and cannot assume
+GitHub Actions, cloud CI, or one specific agent runtime.
 
 ## Configuration
 
@@ -165,6 +188,10 @@ features, bug fixes, refactors, API contracts, and high-risk cleanup.
 Installed target repos get Makefile entrypoints:
 
 - `make docs-check`: run the documentation contract checks.
+- `make agent-docs-lint`: check local agent instruction files for hidden
+  Unicode, stale paths, and unsafe references.
+- `make agent-docs-localize`: emit JSON that maps changed files to likely
+  documentation impact.
 - `make agent-review`: point the agent at the multi-agent repo review prompt.
 - `make agent-learn`: point the agent at the learner-focused comment prompt.
 - `make agent-test-first`: point the agent at the TDD/executable-spec prompt chooser.
@@ -187,7 +214,7 @@ see which profiles or preset were installed.
 - docs as code
 - explicit documentation obligations
 - hooks for local feedback
-- CI for non-bypassable enforcement
+- optional CI adapters, never required for the core local workflow
 - ADRs for important architectural decisions
 - gentle adoption path for solo developers
 

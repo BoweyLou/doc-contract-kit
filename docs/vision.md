@@ -21,7 +21,8 @@ A repository should be able to say:
 - what counts as documentation impact
 - what documentation must change for each class of code change
 - how local contributors get feedback
-- how CI enforces compliance
+- how local checks enforce compliance before any hosted service is involved
+- how optional CI adapters can mirror the local checks when a host supports them
 - when architectural decisions must be recorded
 
 ## Outcome

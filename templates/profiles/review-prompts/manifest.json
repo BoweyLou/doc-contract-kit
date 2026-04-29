@@ -67,6 +67,10 @@
       "target": ".codex/prompts/personas/test-behavior-risk.md"
     },
     {
+      "source": "files/.codex/prompts/personas/manifest.json",
+      "target": ".codex/prompts/personas/manifest.json"
+    },
+    {
       "source": "files/.codex/prompts/review-synthesis.md",
       "target": ".codex/prompts/review-synthesis.md"
     },
@@ -84,4 +88,3 @@
     }
   ]
 }
-

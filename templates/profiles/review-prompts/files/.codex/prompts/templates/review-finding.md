@@ -7,6 +7,7 @@ Use this structure for each finding.
 
 Area: docs | code | tests | build | security | runtime | UX | architecture
 Confidence: high | medium | low
+Disposition: open | accepted | rejected | fixed | deferred | duplicate
 Evidence:
 - `path/to/file.ext:line`: concrete observation
 - command or runtime check used, if any
@@ -22,6 +23,9 @@ Give the smallest useful fix. Name the files or modules likely involved.
 
 Verification:
 Name the test, command, runtime check, or manual inspection that would prove the fix.
+
+False-positive check:
+State the most plausible reason this might be harmless, or write `none found`.
 ```
 
 Priority guide:
@@ -31,3 +35,9 @@ Priority guide:
 - `P2`: Moderate risk, duplicated behavior likely to drift, weak abstraction, or stale documentation.
 - `P3`: Cleanup, clarity, style, or low-risk follow-up.
 
+Default finding budget:
+
+- Return at most 5 findings per persona.
+- Do not include nits unless they block understanding, correctness, security, or
+  the documentation contract.
+- Prefer one well-evidenced finding over several speculative findings.

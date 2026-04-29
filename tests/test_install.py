@@ -30,6 +30,12 @@ class InstallTests(unittest.TestCase):
             self.assertEqual(agents.read_text(encoding="utf-8"), "existing agents\n")
             self.assertTrue((target / "doc-contract.json").exists())
             self.assertTrue((target / "scripts" / "check_doc_impact.py").exists())
+            self.assertTrue((target / "REVIEW.md").exists())
+            self.assertTrue((target / "scripts" / "lint_agent_docs.py").exists())
+            self.assertTrue((target / "scripts" / "localize_doc_impact.py").exists())
+            self.assertTrue((target / "schemas" / "session-receipt.schema.json").exists())
+            self.assertTrue((target / "schemas" / "persona-manifest.schema.json").exists())
+            self.assertTrue((target / ".agent-workflows" / "schemas" / "safe-output.schema.json").exists())
 
     def test_install_force_overwrites_existing_files(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -189,14 +195,26 @@ class InstallTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue((target / ".codex" / "prompts" / "multi-agent-repo-review.md").exists())
             self.assertTrue((target / ".codex" / "prompts" / "tdd" / "test-quality-sentinel.md").exists())
+            self.assertTrue((target / ".agent-workflows" / "README.md").exists())
+            self.assertTrue((target / ".agent-workflows" / "repo-review.md").exists())
+            self.assertTrue((target / ".agent-workflows" / "schemas" / "session-receipt.schema.json").exists())
 
             makefile = (target / "Makefile").read_text(encoding="utf-8")
             self.assertIn("agent-review:", makefile)
             self.assertIn("agent-learn:", makefile)
             self.assertIn("agent-test-first:", makefile)
             self.assertIn("agent-verify:", makefile)
+            self.assertIn("agent-docs-lint:", makefile)
+            self.assertIn("agent-docs-localize:", makefile)
 
-            for target_name in ("agent-review", "agent-learn", "agent-test-first", "agent-verify"):
+            for target_name in (
+                "agent-review",
+                "agent-learn",
+                "agent-test-first",
+                "agent-docs-lint",
+                "agent-docs-localize",
+                "agent-verify",
+            ):
                 make_result = subprocess.run(
                     ["make", target_name],
                     cwd=target,
@@ -208,7 +226,7 @@ class InstallTests(unittest.TestCase):
 
             receipt = json.loads((target / ".doc-contract-kit" / "install.json").read_text(encoding="utf-8"))
             self.assertEqual(receipt["preset"], "agentic")
-            self.assertEqual(receipt["profiles"], ["minimal", "review-prompts", "test-first"])
+            self.assertEqual(receipt["profiles"], ["minimal", "local-agentic", "review-prompts", "test-first"])
 
     def test_install_strict_agentic_preset_composes_keryx_and_prompt_profiles(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -237,8 +255,70 @@ class InstallTests(unittest.TestCase):
             self.assertEqual(receipt["preset"], "strict-agentic")
             self.assertEqual(
                 receipt["profiles"],
-                ["minimal", "review-prompts", "test-first", "keryx-forced"],
+                ["minimal", "local-agentic", "review-prompts", "test-first", "keryx-forced"],
             )
+
+    def test_lint_agent_docs_detects_hidden_unicode(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "target"
+            target.mkdir()
+            bad = target / "AGENTS.md"
+            bad.write_text("safe text\u202e\n", encoding="utf-8")
+
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "scripts" / "lint_agent_docs.py"), "--root", str(target)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("hidden Unicode", result.stdout)
+
+    def test_lint_agent_docs_strict_paths_detects_missing_references(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "target"
+            target.mkdir()
+            (target / "AGENTS.md").write_text("Read `docs/missing.md` first.\n", encoding="utf-8")
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "lint_agent_docs.py"),
+                    "--root",
+                    str(target),
+                    "--strict-paths",
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("referenced path does not exist: docs/missing.md", result.stdout)
+
+    def test_localize_doc_impact_outputs_json_categories(self):
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts" / "localize_doc_impact.py"),
+                "--changed-file",
+                "api/users.py",
+                "--json",
+            ],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["result"], "missing-docs")
+        self.assertEqual(payload["missing_categories"], ["api"])
+        self.assertEqual(payload["categories"][0]["category"], "api")
 
     def test_install_rejects_unknown_preset(self):
         with tempfile.TemporaryDirectory() as tmp:

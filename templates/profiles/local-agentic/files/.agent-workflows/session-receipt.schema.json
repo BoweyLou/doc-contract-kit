@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/doc-contract-kit/session-receipt.schema.json",
+  "title": "Local Agent Session Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tooling", "mode", "scope", "evidence", "findings", "disposition"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "tooling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_tool", "local_only"],
+      "properties": {
+        "agent_tool": {
+          "type": "string"
+        },
+        "agent_tool_version": {
+          "type": ["string", "null"]
+        },
+        "local_only": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["bootstrap", "drift", "pull-request", "release-gate", "learning-comments", "test-first", "verification"]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["changed_files"],
+      "properties": {
+        "changed_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "files_inspected": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commands", "docs_impact", "tests"],
+      "properties": {
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["command", "result"],
+            "properties": {
+              "command": {
+                "type": "string"
+              },
+              "result": {
+                "type": "string",
+                "enum": ["pass", "fail", "not-run", "blocked"]
+              }
+            }
+          }
+        },
+        "docs_impact": {
+          "type": "string",
+          "enum": ["pass", "missing-docs", "waived", "not-applicable", "not-run"]
+        },
+        "tests": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["result"],
+          "properties": {
+            "result": {
+              "type": "string",
+              "enum": ["red-green", "green-only", "not-applicable", "not-run", "blocked"]
+            },
+            "failing_test_evidence": {
+              "type": ["string", "null"]
+            },
+            "passing_test_evidence": {
+              "type": ["string", "null"]
+            },
+            "exception_reason": {
+              "type": ["string", "null"]
+            }
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["priority", "title", "confidence", "evidence", "recommendation", "disposition"],
+        "properties": {
+          "priority": {
+            "type": "string",
+            "enum": ["P0", "P1", "P2", "P3"]
+          },
+          "title": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["high", "medium", "low"]
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "disposition": {
+            "type": "string",
+            "enum": ["open", "accepted", "rejected", "fixed", "deferred", "duplicate"]
+          }
+        }
+      }
+    },
+    "disposition": {
+      "type": "string"
+    }
+  }
+}

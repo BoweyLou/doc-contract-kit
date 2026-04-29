@@ -19,13 +19,14 @@ change, then sync the staged repository state through Keryx before committing.
 - `doc-contract.json` - repository-specific documentation impact rules
 - `.keryx/config.json` - forced Keryx sync configuration
 - `.keryx/sync.json` - generated Keryx sync receipt for the staged state
+- `REVIEW.md` - local review rules and evidence bar
 - `.github/pull_request_template.md` - PR checklist and change classification
 
 ## Keryx sync rule
 
 Keryx is the working cockpit for backlog, architecture, plan, and handoff state.
-The repo keeps a durable mirror so fresh clones, CI, Codex, Claude Code, and
-GitHub still have the same context.
+The repo keeps a durable mirror so fresh clones, local checks, Codex, AmpCode,
+Claude Code, and other local agents still have the same context.
 
 Before committing, sync the current staged state through Keryx and stage the
 updated `.keryx/sync.json` receipt. The pre-commit hook must block stale or
@@ -69,6 +70,8 @@ Before finishing work, run:
 - `make docs-generate`
 - `python3 scripts/check_doc_impact.py`
 - `python3 scripts/check_keryx_sync.py --staged`
+- `python3 scripts/lint_agent_docs.py --strict-paths`
+- `python3 scripts/localize_doc_impact.py --working-tree --json`
 
 If these fail, fix the issue before considering the task complete.
 

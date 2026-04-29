@@ -2,6 +2,10 @@
 
 Use these prompts as a multi-agent codebase review kit.
 
+The prompt content is tool agnostic. Codex can read it from `.codex/prompts/`,
+but AmpCode, Claude Code, Aider, Cline, or a manual reviewer can use the same
+Markdown files directly from the checkout.
+
 ## Core Flow
 
 - `multi-agent-repo-review.md`: Orchestrates repo mapping, reviewer dispatch, and review boundaries.
@@ -13,6 +17,10 @@ Use these prompts as a multi-agent codebase review kit.
 - `tdd/`: Test-first and executable-spec prompt set for feature work, bug fixes, refactors, contracts, invariants, and test-quality review.
 
 ## Persona Reviewers
+
+The machine-readable reviewer registry is `personas/manifest.json`. Use it to
+keep reviewer scopes narrow, read-only by default, and capped to high-signal
+findings.
 
 - `personas/doc-code-delta.md`: Finds drift between docs and implementation.
 - `personas/ai-code-slop.md`: Finds generated-looking slop, brittle shortcuts, and shallow abstractions.
@@ -30,6 +38,10 @@ Use these prompts as a multi-agent codebase review kit.
 
 - `templates/review-finding.md`: Shared finding format for reviewer outputs.
 - `templates/agent-brief.md`: Fill-in brief for launching a focused reviewer.
+- `schemas/session-receipt.schema.json`: Local run receipt schema for
+  commands, docs impact, TDD evidence, findings, and final disposition.
+- `schemas/persona-manifest.schema.json`: Validator schema for the persona
+  manifest.
 
 ## Recommended Dispatch
 

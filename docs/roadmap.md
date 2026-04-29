@@ -16,6 +16,10 @@
 - composable profiles and named presets
 - installed profile receipt
 - review-prompts and test-first profiles
+- local-agentic profile for AmpCode, Codex, and other local agent tools
+- local agent-instruction lint
+- local docs-impact localization JSON
+- safe-output schema for local agent review reports
 - example repos with more realism
 - installer tests
 
@@ -25,9 +29,10 @@
 - executable docs checks
 - stack-aware template profiles
 - Hermes/Keryx skill automation
+- benchmark fixtures for docs-impact false positives and review noise
 
 ## v0.4
 
 - richer upgrade paths
 - repo scoring/freshness heuristics
-- optional stricter CI rules
+- optional CI adapters for teams that can use them

@@ -25,13 +25,18 @@ Rules:
 - Do not mark a bug fixed without a regression signal unless the environment makes testing impossible; if so, explain the blocker.
 - Avoid broad refactors during bug fixes unless required by the root cause.
 - Keep the test focused on externally observable behavior.
+- Capture the failing regression evidence and the passing evidence after the
+  fix. If the reproduction is command-based rather than test-based, record that
+  command in the same red/green structure.
 
 Output:
 - Reproduction path.
 - Regression test added.
+- Failing regression evidence before the fix.
+- Passing regression evidence after the fix.
+- Generated-test provenance if the agent wrote or substantially shaped a test.
 - Root cause.
 - Fix summary.
 - Verification commands and results.
 - Residual risk.
 ```
-

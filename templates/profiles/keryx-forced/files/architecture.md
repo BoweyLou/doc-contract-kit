@@ -3,7 +3,7 @@
 This file is the repository mirror of the Keryx architecture view.
 
 Use it for durable architectural context that coding agents should see in a
-fresh clone, pull request, or CI run.
+fresh clone, local review, pull request, or optional CI adapter.
 
 ## System Shape
 
