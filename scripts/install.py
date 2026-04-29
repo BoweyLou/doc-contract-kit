@@ -25,6 +25,7 @@ FILE_MAP = {
     "AGENTS.md": "AGENTS.md",
     "REVIEW.md": "REVIEW.md",
     "documentation-contract.md": "docs/documentation-contract.md",
+    "ops-agent-workflow.md": "docs/ops/agent-workflow.md",
     "adr-template.md": "docs/adr/0000-template.md",
     "pull_request_template.md": ".github/pull_request_template.md",
     "docs-workflow.yml": ".github/workflows/docs.yml",

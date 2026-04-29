@@ -75,6 +75,18 @@ AmpCode, Codex, Claude Code, Aider, Cline, or a manual shell workflow. It does
 not require GitHub Actions and is suitable for locked-down on-prem Git servers
 such as older Bitbucket deployments.
 
+If you are already inside the target repo and this kit is cloned locally:
+
+```bash
+python3 /path/to/repo-contract-kit/scripts/install.py "$(pwd)" --preset agentic
+```
+
+If you do not have the kit cloned yet and internet access is available:
+
+```bash
+tmp="$(mktemp -d)" && git clone --depth 1 https://github.com/BoweyLou/repo-contract-kit "$tmp/repo-contract-kit" && python3 "$tmp/repo-contract-kit/scripts/install.py" "$(pwd)" --preset agentic
+```
+
 Then inside the target repo:
 
 ```bash
@@ -128,6 +140,7 @@ The kit currently installs:
 - `AGENTS.md`
 - `REVIEW.md`
 - `docs/documentation-contract.md`
+- `docs/ops/agent-workflow.md`
 - `docs/adr/0000-template.md`
 - `.github/pull_request_template.md`
 - `.github/workflows/docs.yml`

@@ -9,6 +9,26 @@ ROOT = Path(__file__).resolve().parents[1]
 INSTALL = ROOT / "scripts" / "install.py"
 
 
+def init_real_git_repo(path: Path):
+    subprocess.run(["git", "init", "-q"], cwd=path, check=True)
+    (path / "README.md").write_text("# Sample repo\n", encoding="utf-8")
+    subprocess.run(["git", "add", "README.md"], cwd=path, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=repo-contract-kit test",
+            "-c",
+            "user.email=repo-contract-kit@example.invalid",
+            "commit",
+            "-qm",
+            "Initial sample repo",
+        ],
+        cwd=path,
+        check=True,
+    )
+
+
 class InstallTests(unittest.TestCase):
     def test_install_writes_config_and_skips_existing_files(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -182,7 +202,7 @@ class InstallTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "target"
             target.mkdir()
-            (target / ".git").mkdir()
+            init_real_git_repo(target)
 
             result = subprocess.run(
                 [sys.executable, str(INSTALL), str(target), "--preset", "agentic"],
@@ -198,6 +218,7 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((target / ".agent-workflows" / "README.md").exists())
             self.assertTrue((target / ".agent-workflows" / "repo-review.md").exists())
             self.assertTrue((target / ".agent-workflows" / "schemas" / "session-receipt.schema.json").exists())
+            self.assertTrue((target / "docs" / "ops" / "agent-workflow.md").exists())
 
             makefile = (target / "Makefile").read_text(encoding="utf-8")
             self.assertIn("agent-review:", makefile)
