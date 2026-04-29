@@ -245,6 +245,11 @@ class InstallTests(unittest.TestCase):
                 )
                 self.assertEqual(make_result.returncode, 0, make_result.stderr)
 
+                if target_name == "agent-review":
+                    self.assertIn("Read AGENTS.md, REVIEW.md", make_result.stdout)
+                    self.assertIn(".agent-workflows/repo-review.md in bootstrap mode", make_result.stdout)
+                    self.assertIn("Produce a findings backlog before editing code", make_result.stdout)
+
             receipt = json.loads((target / ".doc-contract-kit" / "install.json").read_text(encoding="utf-8"))
             self.assertEqual(receipt["preset"], "agentic")
             self.assertEqual(receipt["profiles"], ["minimal", "local-agentic", "review-prompts", "test-first"])

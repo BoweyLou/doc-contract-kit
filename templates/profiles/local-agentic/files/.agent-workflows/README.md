@@ -6,6 +6,22 @@ GitHub Actions, hosted CI, or a specific coding assistant.
 Use them from AmpCode, Codex, Claude Code, Aider, Cline, another local agent, or
 a human terminal session.
 
+## Start an Agent
+
+Give the agent this brief from the repository root:
+
+```text
+Read AGENTS.md, REVIEW.md, and .agent-workflows/README.md.
+Then follow .agent-workflows/repo-review.md in bootstrap mode.
+Use the installed personas and prompts under .codex/prompts/ where useful.
+Start by running make agent-verify and make agent-docs-localize.
+Produce a findings backlog before editing code.
+```
+
+For ongoing work after the first bootstrap review, change `bootstrap mode` to
+`drift mode`, `pull-request mode`, `release-gate mode`,
+`learning-comments mode`, or `test-first mode`.
+
 ## Files
 
 - `REVIEW.md`: local review rules and evidence bar.
@@ -37,3 +53,11 @@ python3 scripts/localize_doc_impact.py --working-tree --json
 Native folders like `.codex/prompts/`, `.cursor/rules/`, or `CLAUDE.md` are
 optional adapters. The local workflow must still be understandable from this
 folder, `AGENTS.md`, `REVIEW.md`, and the scripts.
+
+## Prompt Source
+
+The prompts under `.codex/prompts/` are copied into this repo by
+`repo-contract-kit` so local agents can work without fetching another
+repository. The canonical prompt library lives in
+the public `agent-workflow-kit` repository; refresh this repo by rerunning the
+installer from a newer `repo-contract-kit` checkout.

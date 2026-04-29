@@ -97,6 +97,28 @@ make agent-review
 make agent-test-first
 ```
 
+## Start an Agent in an Existing Repo
+
+After installing the `agentic` preset, point Codex, AmpCode, or another local
+coding agent at the target repo and give it this brief:
+
+```text
+Read AGENTS.md, REVIEW.md, and .agent-workflows/README.md.
+Then follow .agent-workflows/repo-review.md in bootstrap mode.
+Use the installed personas and prompts under .codex/prompts/ where useful.
+Start by running make agent-verify and make agent-docs-localize.
+Produce a findings backlog before editing code.
+```
+
+You can also run `make agent-review` in the target repo to print this brief
+locally.
+
+The installer copies a vendored snapshot of the prompt library into the target
+repo under `.codex/prompts/`. The companion
+[agent-workflow-kit](https://github.com/BoweyLou/agent-workflow-kit) repo is the
+canonical place to improve those prompts, but target repos do not need to clone
+or fetch it at runtime.
+
 If the target repo uses pre-commit hooks:
 
 ```bash

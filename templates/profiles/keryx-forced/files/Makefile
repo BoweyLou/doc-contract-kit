@@ -32,9 +32,18 @@ agent-docs-localize:
 
 agent-review:
 	@if test -f .agent-workflows/repo-review.md; then \
-		echo "Use .agent-workflows/repo-review.md for a tool-agnostic local repo review."; \
+		printf "%s\n" \
+			"Read AGENTS.md, REVIEW.md, and .agent-workflows/README.md." \
+			"Then follow .agent-workflows/repo-review.md in bootstrap mode." \
+			"Use the installed personas and prompts under .codex/prompts/ where useful." \
+			"Start by running make agent-verify and make agent-docs-localize." \
+			"Produce a findings backlog before editing code."; \
 	elif test -f .codex/prompts/multi-agent-repo-review.md; then \
-		echo "Use .codex/prompts/multi-agent-repo-review.md for the repo review."; \
+		printf "%s\n" \
+			"Read AGENTS.md and REVIEW.md." \
+			"Then follow .codex/prompts/multi-agent-repo-review.md in bootstrap mode." \
+			"Start by running make agent-verify and make agent-docs-localize." \
+			"Produce a findings backlog before editing code."; \
 	else \
 		echo "Missing local review workflow; install the local-agentic or review-prompts profile."; exit 1; \
 	fi

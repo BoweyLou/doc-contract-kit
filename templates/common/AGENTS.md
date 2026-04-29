@@ -6,6 +6,22 @@ This repository uses docs-as-code. Documentation is part of the definition of do
 
 If you change code, you must consider whether documentation also needs to change.
 
+## Agent self-start
+
+If asked to review, understand, clean up, or formalize this repo, start here:
+
+1. Read `AGENTS.md`, `REVIEW.md`, and `.agent-workflows/README.md`.
+2. Follow `.agent-workflows/repo-review.md` in the requested mode. Use
+   `bootstrap` for the first review of an inherited or newly instrumented repo.
+3. Use the installed personas and prompts under `.codex/prompts/` where useful.
+4. Run `make agent-verify` and `make agent-docs-localize` before proposing code
+   changes.
+5. Produce a findings backlog before editing code.
+
+The prompts under `.codex/prompts/` are local copies installed by
+`repo-contract-kit`. Do not fetch prompts from another repo during normal work
+unless the user explicitly asks you to refresh the kit.
+
 ## Where documentation lives
 
 - `README.md` — high-level overview and getting started
