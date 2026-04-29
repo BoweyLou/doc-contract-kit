@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.local/doc-contract-kit/safe-output.schema.json",
+  "$id": "https://example.local/repo-contract-kit/safe-output.schema.json",
   "title": "Doc Contract Safe Agent Output",
   "type": "object",
   "additionalProperties": false,

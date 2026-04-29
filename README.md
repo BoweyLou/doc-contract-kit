@@ -1,7 +1,5 @@
 # repo-contract-kit
 
-Formerly **doc-contract-kit**.
-
 `repo-contract-kit` is an installable repository contract kit for local-first
 agentic development. It adds documentation contracts, agent instruction hygiene,
 evidence receipts, local verification commands, and optional workflow profiles
@@ -34,10 +32,10 @@ This repository is the install layer:
 - local agent workflow files under `.agent-workflows/`
 - tool-agnostic schemas and safe-output boundaries
 
-The companion workflow layer is **agent-workflow-kit** (formerly
-`Codex_CodeReview`). That repo owns the prompt library, reviewer personas,
-learning-comments workflows, TDD prompts, synthesis prompts, and research
-backlog.
+The companion workflow layer is
+[agent-workflow-kit](https://github.com/BoweyLou/agent-workflow-kit). That repo
+owns the prompt library, reviewer personas, learning-comments workflows, TDD
+prompts, synthesis prompts, and research backlog.
 
 ## Core idea
 
@@ -226,7 +224,8 @@ Installed target repos get Makefile entrypoints:
 
 The installer also writes `.doc-contract-kit/install.json` so later upgrades can
 see which profiles or preset were installed. That compatibility path keeps
-existing installations stable while the project name moves to repo-contract-kit.
+existing installations stable even though the public project name is
+repo-contract-kit.
 
 ## Recommended rollout
 
@@ -271,9 +270,7 @@ This repository is intentionally early and iterative.
 The goal is to create a calm, reusable repository operating system for local
 agentic software development.
 
-## Naming Status
+## Public Repository
 
-The intended project name is `repo-contract-kit`. The current repository path,
-remote, installer metadata path, and some compatibility keys may still use
-`doc-contract-kit` until the GitHub repository, local directory, and migration
-story are renamed deliberately.
+This repo is published as
+[BoweyLou/repo-contract-kit](https://github.com/BoweyLou/repo-contract-kit).

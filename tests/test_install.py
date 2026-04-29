@@ -176,7 +176,7 @@ class InstallTests(unittest.TestCase):
             receipt = json.loads((target / ".doc-contract-kit" / "install.json").read_text(encoding="utf-8"))
             self.assertEqual(receipt["profiles"], ["review-prompts", "test-first"])
             self.assertIsNone(receipt["preset"])
-            self.assertIn("doc-contract-kit", receipt["source_commits"])
+            self.assertIn("repo-contract-kit", receipt["source_commits"])
 
     def test_install_agentic_preset_writes_commands_and_receipt(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -1,8 +1,7 @@
 # Rollout Guide
 
-This guide refers to **repo-contract-kit**, formerly `doc-contract-kit`.
-Existing commands, receipt paths, and repository paths may still use
-`doc-contract-kit` until the rename is completed deliberately.
+This guide refers to **repo-contract-kit**. Existing install receipts still use
+the `.doc-contract-kit/` directory for compatibility.
 
 If this is all new to you, adopt it in layers.
 

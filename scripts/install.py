@@ -156,7 +156,7 @@ def write_install_receipt(target: Path, profiles: list[str], preset: str | None)
         "preset": preset,
         "profiles": profiles,
         "source_commits": {
-            "doc-contract-kit": current_git_commit(),
+            "repo-contract-kit": current_git_commit(),
         },
     }
     receipt_path = target / ".doc-contract-kit" / "install.json"

@@ -3,11 +3,10 @@
 repo-contract-kit exists to make repository operating expectations explicit,
 local, and enforceable.
 
-It was originally doc-contract-kit, focused on documentation freshness. That is
-still the first contract, but the project now covers the wider local guardrail
-surface that agent-assisted repositories need: documentation impact, agent
-instructions, review policy, evidence receipts, TDD expectations, and optional
-workflow profiles.
+Documentation freshness is still the first contract, but the project now covers
+the wider local guardrail surface that agent-assisted repositories need:
+documentation impact, agent instructions, review policy, evidence receipts, TDD
+expectations, and optional workflow profiles.
 
 ## Problem
 
