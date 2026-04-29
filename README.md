@@ -56,6 +56,12 @@ To install the forced Keryx cockpit profile:
 python3 scripts/install.py /path/to/target/repo --profile keryx-forced
 ```
 
+To install the test-first executable-spec profile:
+
+```bash
+python3 scripts/install.py /path/to/target/repo --profile test-first
+```
+
 ## What gets installed
 
 The starter kit currently installs:
@@ -111,6 +117,16 @@ locally unless `.keryx/sync.json` matches the current staged tree and configured
 mirror docs.
 
 See `docs/keryx-forced-profile.md` for the expected lifecycle.
+
+The `test-first` profile also installs:
+
+- `.codex/prompts/tdd/`
+- `docs/testing-strategy.md`
+- `docs/adr/0001-testing-philosophy.md`
+- a PR template with test-first evidence checks
+
+Use it when a repository should treat tests as executable documentation for
+features, bug fixes, refactors, API contracts, and high-risk cleanup.
 
 ## Recommended rollout
 

@@ -115,6 +115,31 @@ class InstallTests(unittest.TestCase):
             self.assertFalse((target / ".keryx").exists())
             self.assertFalse((target / "scripts" / "check_keryx_sync.py").exists())
 
+    def test_install_test_first_profile_writes_executable_spec_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "target"
+            target.mkdir()
+            (target / ".git").mkdir()
+
+            result = subprocess.run(
+                [sys.executable, str(INSTALL), str(target), "--profile", "test-first"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((target / ".codex" / "prompts" / "tdd" / "README.md").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "tdd" / "regression-first-bugfix.md").exists())
+            self.assertTrue((target / "docs" / "testing-strategy.md").exists())
+            self.assertTrue((target / "docs" / "adr" / "0001-testing-philosophy.md").exists())
+
+            pr_template = (target / ".github" / "pull_request_template.md").read_text(encoding="utf-8")
+            self.assertIn("Test-first evidence", pr_template)
+            self.assertIn("No tests needed:", pr_template)
+            self.assertIn("review docs/testing-strategy.md", result.stdout)
+
     def test_install_rejects_unknown_profile(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "target"

@@ -112,6 +112,8 @@ def main():
     print("  pre-commit install")
     if args.profile == "keryx-forced":
         print("  sync staged changes through Keryx before committing")
+    if args.profile == "test-first":
+        print("  review docs/testing-strategy.md and .codex/prompts/tdd/ before the next behavior change")
     print("  git status")
 
 
