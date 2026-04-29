@@ -1,5 +1,10 @@
 # Roadmap
 
+Naming note: this project is moving from `doc-contract-kit` toward
+`repo-contract-kit`. The documentation contract remains the core use case, but
+the roadmap now covers the broader local repository contract for agentic
+development.
+
 ## v0.1
 
 - minimal templates
@@ -25,6 +30,9 @@
 
 ## v0.3
 
+- README/name transition from doc-contract-kit to repo-contract-kit
+- compatibility notes for existing `.doc-contract-kit/` install receipts
+- clearer relationship with agent-workflow-kit
 - generated docs integration
 - executable docs checks
 - stack-aware template profiles

@@ -1,6 +1,6 @@
 ---
 name: repo-doc-contract-bootstrap
-description: Bootstrap the doc-contract-kit starter files into a target repository and explain the installed system in beginner-friendly terms.
+description: Bootstrap the repo-contract-kit starter files into a target repository and explain the installed system in beginner-friendly terms.
 version: 0.1.0
 author: Yannick Bowe and Hermes Agent
 license: MIT
@@ -10,7 +10,9 @@ license: MIT
 
 ## Purpose
 
-Install the doc-contract-kit starter files into a repository so documentation expectations become explicit and enforceable.
+Install the repo-contract-kit starter files into a repository so documentation
+expectations, local agent workflows, and evidence requirements become explicit
+and enforceable.
 
 ## When to use
 
@@ -29,7 +31,7 @@ Use this when:
    - `test-first` for docs plus executable-spec prompts.
    - `agentic` for docs, review prompts, learning prompts, and test-first prompts.
    - `strict-agentic` when Keryx must be the mandatory cockpit as well.
-4. Install or update the starter files and `doc-contract.json` from doc-contract-kit.
+4. Install or update the starter files and `doc-contract.json` from repo-contract-kit.
 5. Explain what was installed in beginner-friendly language.
 6. Run `make docs-check` if the target repo has the installed files.
 7. For agentic presets, point the user at `make agent-review`, `make agent-learn`, and `make agent-test-first`.

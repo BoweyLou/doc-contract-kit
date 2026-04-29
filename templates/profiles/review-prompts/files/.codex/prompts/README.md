@@ -1,6 +1,7 @@
 # Prompt Index
 
-Use these prompts as a multi-agent codebase review kit.
+Use these prompts as the workflow library for `agent-workflow-kit`: portable
+multi-agent review, learning, remediation, TDD, and verification workflows.
 
 The prompt content is tool agnostic. Codex can read it from `.codex/prompts/`,
 but AmpCode, Claude Code, Aider, Cline, or a manual reviewer can use the same

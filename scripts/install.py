@@ -166,7 +166,9 @@ def write_install_receipt(target: Path, profiles: list[str], preset: str | None)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Install doc-contract-kit into a target repo")
+    parser = argparse.ArgumentParser(
+        description="Install repo-contract-kit files into a target repo"
+    )
     parser.add_argument("target", help="Path to target repository")
     parser.add_argument(
         "--profile",

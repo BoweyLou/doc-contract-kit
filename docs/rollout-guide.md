@@ -1,5 +1,9 @@
 # Rollout Guide
 
+This guide refers to **repo-contract-kit**, formerly `doc-contract-kit`.
+Existing commands, receipt paths, and repository paths may still use
+`doc-contract-kit` until the rename is completed deliberately.
+
 If this is all new to you, adopt it in layers.
 
 ## Suggested order
@@ -48,4 +52,5 @@ Do not attempt to standardize everything at once.
 
 The first version will probably be too weak in some places and too strict in others.
 That is normal.
-The point of doc-contract-kit is to give you a versioned place to improve the system.
+The point of repo-contract-kit is to give you a versioned place to improve the
+system.
