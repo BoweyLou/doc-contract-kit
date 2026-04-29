@@ -23,11 +23,17 @@ Use this when:
 
 1. Confirm the target path is a git repo.
 2. Inspect whether docs/, .github/, and scripts/ already exist.
-3. Choose the `minimal` profile by default, or `keryx-forced` when Keryx must be the mandatory cockpit.
+3. Choose a preset or profile:
+   - `minimal` for the documentation contract only.
+   - `learning` for docs plus review/learning prompts.
+   - `test-first` for docs plus executable-spec prompts.
+   - `agentic` for docs, review prompts, learning prompts, and test-first prompts.
+   - `strict-agentic` when Keryx must be the mandatory cockpit as well.
 4. Install or update the starter files and `doc-contract.json` from doc-contract-kit.
 5. Explain what was installed in beginner-friendly language.
 6. Run `make docs-check` if the target repo has the installed files.
-7. Summarize any collisions or manual follow-up.
+7. For agentic presets, point the user at `make agent-review`, `make agent-learn`, and `make agent-test-first`.
+8. Summarize any collisions or manual follow-up.
 
 ## Important rule
 

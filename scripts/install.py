@@ -1,14 +1,24 @@
 #!/usr/bin/env python3
 
 import argparse
+from datetime import datetime, timezone
 import json
 import shutil
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES = ROOT / "templates" / "common"
 PROFILES = ROOT / "templates" / "profiles"
 DEFAULT_PROFILE = "minimal"
+KIT_VERSION = "0.2.0"
+PRESETS = {
+    "minimal": ["minimal"],
+    "learning": ["minimal", "review-prompts"],
+    "test-first": ["minimal", "test-first"],
+    "agentic": ["minimal", "review-prompts", "test-first"],
+    "strict-agentic": ["minimal", "review-prompts", "test-first", "keryx-forced"],
+}
 
 FILE_MAP = {
     "doc-contract.json": "doc-contract.json",
@@ -75,7 +85,74 @@ def install_profile_files(profile_name: str, target: Path, force: bool, written_
 
         dst = target / entry["target"]
         src = resolve_profile_source(profile_dir, entry["source"])
-        copy_file(src, dst, force or dst in written_targets)
+        if copy_file(src, dst, force or dst in written_targets):
+            written_targets.add(dst)
+
+
+def split_profiles(value: str):
+    profiles = [part.strip() for part in value.split(",") if part.strip()]
+    if not profiles:
+        raise SystemExit("No profiles specified")
+    return profiles
+
+
+def unique_ordered(items: list[str]):
+    seen = set()
+    result = []
+    for item in items:
+        if item not in seen:
+            seen.add(item)
+            result.append(item)
+    return result
+
+
+def resolve_requested_profiles(args):
+    if args.preset:
+        if args.preset not in PRESETS:
+            available = ", ".join(sorted(PRESETS))
+            raise SystemExit(f"Unknown preset: {args.preset}. Available presets: {available}")
+        profiles = list(PRESETS[args.preset])
+    elif args.profiles:
+        profiles = split_profiles(args.profiles)
+    elif args.profile:
+        profiles = [args.profile]
+    else:
+        profiles = [DEFAULT_PROFILE]
+
+    return unique_ordered(profiles)
+
+
+def current_git_commit():
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(ROOT), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return None
+
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip() or None
+
+
+def write_install_receipt(target: Path, profiles: list[str], preset: str | None):
+    receipt = {
+        "schema_version": 1,
+        "kit_version": KIT_VERSION,
+        "installed_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "preset": preset,
+        "profiles": profiles,
+        "source_commits": {
+            "doc-contract-kit": current_git_commit(),
+        },
+    }
+    receipt_path = target / ".doc-contract-kit" / "install.json"
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(f"WRITE {receipt_path}")
 
 
 def main():
@@ -83,14 +160,23 @@ def main():
     parser.add_argument("target", help="Path to target repository")
     parser.add_argument(
         "--profile",
-        default=DEFAULT_PROFILE,
-        help=f"Template profile to install. Defaults to {DEFAULT_PROFILE}.",
+        default=None,
+        help=f"Single template profile to install. Defaults to {DEFAULT_PROFILE}.",
+    )
+    parser.add_argument(
+        "--profiles",
+        help="Comma-separated template profiles to compose, for example review-prompts,test-first.",
+    )
+    parser.add_argument(
+        "--preset",
+        help=f"Named profile set. Available presets: {', '.join(sorted(PRESETS))}.",
     )
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
     args = parser.parse_args()
 
     target = Path(args.target).expanduser().resolve()
     ensure_git_repo(target)
+    profiles = resolve_requested_profiles(args)
 
     written_targets = set()
     for src_name, dst_name in FILE_MAP.items():
@@ -102,17 +188,24 @@ def main():
     if copy_file(ROOT / "scripts" / "check_doc_impact.py", check_doc_dst, args.force):
         written_targets.add(check_doc_dst)
 
-    install_profile_files(args.profile, target, args.force, written_targets)
+    for profile in profiles:
+        install_profile_files(profile, target, args.force, written_targets)
+
+    write_install_receipt(target, profiles, args.preset)
 
     print("\nInstall complete.")
-    print(f"Profile: {args.profile}")
+    print(f"Profiles: {', '.join(profiles)}")
+    if args.preset:
+        print(f"Preset: {args.preset}")
     print("Next steps:")
     print(f"  cd {target}")
     print("  make docs-check")
     print("  pre-commit install")
-    if args.profile == "keryx-forced":
+    if "keryx-forced" in profiles:
         print("  sync staged changes through Keryx before committing")
-    if args.profile == "test-first":
+    if "review-prompts" in profiles:
+        print("  run make agent-review or make agent-learn when you want agent guidance")
+    if "test-first" in profiles:
         print("  review docs/testing-strategy.md and .codex/prompts/tdd/ before the next behavior change")
     print("  git status")
 

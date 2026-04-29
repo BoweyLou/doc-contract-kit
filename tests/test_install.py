@@ -2,6 +2,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -139,6 +140,122 @@ class InstallTests(unittest.TestCase):
             self.assertIn("Test-first evidence", pr_template)
             self.assertIn("No tests needed:", pr_template)
             self.assertIn("review docs/testing-strategy.md", result.stdout)
+
+    def test_install_composed_profiles_write_review_and_tdd_prompts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "target"
+            target.mkdir()
+            (target / ".git").mkdir()
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(INSTALL),
+                    str(target),
+                    "--profiles",
+                    "review-prompts,test-first",
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((target / ".codex" / "prompts" / "multi-agent-repo-review.md").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "codebase-learning-comments.md").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "personas" / "doc-code-delta.md").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "tdd" / "README.md").exists())
+
+            receipt = json.loads((target / ".doc-contract-kit" / "install.json").read_text(encoding="utf-8"))
+            self.assertEqual(receipt["profiles"], ["review-prompts", "test-first"])
+            self.assertIsNone(receipt["preset"])
+            self.assertIn("doc-contract-kit", receipt["source_commits"])
+
+    def test_install_agentic_preset_writes_commands_and_receipt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "target"
+            target.mkdir()
+            (target / ".git").mkdir()
+
+            result = subprocess.run(
+                [sys.executable, str(INSTALL), str(target), "--preset", "agentic"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((target / ".codex" / "prompts" / "multi-agent-repo-review.md").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "tdd" / "test-quality-sentinel.md").exists())
+
+            makefile = (target / "Makefile").read_text(encoding="utf-8")
+            self.assertIn("agent-review:", makefile)
+            self.assertIn("agent-learn:", makefile)
+            self.assertIn("agent-test-first:", makefile)
+            self.assertIn("agent-verify:", makefile)
+
+            for target_name in ("agent-review", "agent-learn", "agent-test-first", "agent-verify"):
+                make_result = subprocess.run(
+                    ["make", target_name],
+                    cwd=target,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(make_result.returncode, 0, make_result.stderr)
+
+            receipt = json.loads((target / ".doc-contract-kit" / "install.json").read_text(encoding="utf-8"))
+            self.assertEqual(receipt["preset"], "agentic")
+            self.assertEqual(receipt["profiles"], ["minimal", "review-prompts", "test-first"])
+
+    def test_install_strict_agentic_preset_composes_keryx_and_prompt_profiles(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "target"
+            target.mkdir()
+            (target / ".git").mkdir()
+
+            result = subprocess.run(
+                [sys.executable, str(INSTALL), str(target), "--preset", "strict-agentic"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((target / ".keryx" / "config.json").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "multi-agent-repo-review.md").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "tdd" / "README.md").exists())
+
+            makefile = (target / "Makefile").read_text(encoding="utf-8")
+            self.assertIn("keryx-check:", makefile)
+            self.assertIn("agent-review:", makefile)
+
+            receipt = json.loads((target / ".doc-contract-kit" / "install.json").read_text(encoding="utf-8"))
+            self.assertEqual(receipt["preset"], "strict-agentic")
+            self.assertEqual(
+                receipt["profiles"],
+                ["minimal", "review-prompts", "test-first", "keryx-forced"],
+            )
+
+    def test_install_rejects_unknown_preset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "target"
+            target.mkdir()
+            (target / ".git").mkdir()
+
+            result = subprocess.run(
+                [sys.executable, str(INSTALL), str(target), "--preset", "missing"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Unknown preset: missing", result.stderr)
 
     def test_install_rejects_unknown_profile(self):
         with tempfile.TemporaryDirectory() as tmp:

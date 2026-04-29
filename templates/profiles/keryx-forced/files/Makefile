@@ -1,4 +1,4 @@
-.PHONY: docs-lint docs-build docs-generate docs-check keryx-check
+.PHONY: docs-lint docs-build docs-generate docs-check keryx-check agent-review agent-learn agent-test-first agent-verify
 
 docs-lint:
 	@echo "Running basic docs lint checks..."
@@ -22,3 +22,18 @@ keryx-check:
 
 docs-check: docs-lint docs-build docs-generate keryx-check
 	@python3 scripts/check_doc_impact.py --working-tree
+
+agent-review:
+	@test -f .codex/prompts/multi-agent-repo-review.md || (echo "Missing .codex/prompts/multi-agent-repo-review.md; install the review-prompts profile." && exit 1)
+	@echo "Use .codex/prompts/multi-agent-repo-review.md for the repo review."
+
+agent-learn:
+	@test -f .codex/prompts/codebase-learning-comments.md || (echo "Missing .codex/prompts/codebase-learning-comments.md; install the review-prompts profile." && exit 1)
+	@echo "Use .codex/prompts/codebase-learning-comments.md for learner-focused comments."
+
+agent-test-first:
+	@test -f .codex/prompts/tdd/README.md || (echo "Missing .codex/prompts/tdd/README.md; install the test-first profile." && exit 1)
+	@echo "Use .codex/prompts/tdd/README.md to pick the executable-spec prompt."
+
+agent-verify: docs-check
+	@echo "Agent verification checks passed."

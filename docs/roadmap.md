@@ -13,6 +13,9 @@
 - configurable path classification
 - explicit no-docs-needed declaration support
 - forced Keryx profile for mirrored backlog, architecture, plan, and sync receipts
+- composable profiles and named presets
+- installed profile receipt
+- review-prompts and test-first profiles
 - example repos with more realism
 - installer tests
 

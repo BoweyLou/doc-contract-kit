@@ -38,10 +38,18 @@ From inside this repo:
 python3 scripts/install.py /path/to/target/repo
 ```
 
+For the opinionated agentic setup:
+
+```bash
+python3 scripts/install.py /path/to/target/repo --preset agentic
+```
+
 Then inside the target repo:
 
 ```bash
 make docs-check
+make agent-review
+make agent-test-first
 ```
 
 If the target repo uses pre-commit hooks:
@@ -61,6 +69,22 @@ To install the test-first executable-spec profile:
 ```bash
 python3 scripts/install.py /path/to/target/repo --profile test-first
 ```
+
+To compose profiles directly:
+
+```bash
+python3 scripts/install.py /path/to/target/repo --profiles review-prompts,test-first
+```
+
+## Presets
+
+Presets are the easiest way to install a coherent operating mode:
+
+- `minimal`: documentation contract only.
+- `learning`: documentation contract plus review and learning prompts.
+- `test-first`: documentation contract plus TDD/executable-spec prompts.
+- `agentic`: documentation contract, review prompts, learning prompts, and test-first prompts.
+- `strict-agentic`: `agentic` plus the forced Keryx cockpit profile.
 
 ## What gets installed
 
@@ -90,6 +114,14 @@ The `keryx-forced` profile also installs:
 - a stricter `AGENTS.md`
 - a Keryx-aware `Makefile`
 - a pre-commit config that runs both the docs contract and Keryx sync receipt checks
+
+The `review-prompts` profile also installs:
+
+- `.codex/prompts/multi-agent-repo-review.md`
+- `.codex/prompts/codebase-learning-comments.md`
+- `.codex/prompts/personas/`
+- `.codex/prompts/templates/`
+- remediation and verification prompts
 
 ## Configuration
 
@@ -127,6 +159,19 @@ The `test-first` profile also installs:
 
 Use it when a repository should treat tests as executable documentation for
 features, bug fixes, refactors, API contracts, and high-risk cleanup.
+
+## Installed commands
+
+Installed target repos get Makefile entrypoints:
+
+- `make docs-check`: run the documentation contract checks.
+- `make agent-review`: point the agent at the multi-agent repo review prompt.
+- `make agent-learn`: point the agent at the learner-focused comment prompt.
+- `make agent-test-first`: point the agent at the TDD/executable-spec prompt chooser.
+- `make agent-verify`: run the verification checks currently available in the installed profile.
+
+The installer also writes `.doc-contract-kit/install.json` so later upgrades can
+see which profiles or preset were installed.
 
 ## Recommended rollout
 
