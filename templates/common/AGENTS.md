@@ -11,12 +11,19 @@ If you change code, you must consider whether documentation also needs to change
 If asked to review, understand, clean up, or formalize this repo, start here:
 
 1. Read `AGENTS.md`, `REVIEW.md`, and `.agent-workflows/README.md`.
-2. Follow `.agent-workflows/repo-review.md` in the requested mode. Use
+2. Run `make agent-start` to create a local startup packet under
+   `.agent-workflows/runs/`.
+3. Inspect `make kit-status` and `make version-status` output when available so
+   you know the installed kit version and target repo version.
+4. Follow `.agent-workflows/repo-review.md` in the requested mode. Use
    `bootstrap` for the first review of an inherited or newly instrumented repo.
-3. Use the installed personas and prompts under `.codex/prompts/` where useful.
-4. Run `make agent-verify` and `make agent-docs-localize` before proposing code
+5. Use the installed personas and prompts under `.codex/prompts/` where useful.
+6. Run `make agent-verify` and `make agent-docs-localize` before proposing code
    changes.
-5. Produce a findings backlog before editing code.
+7. Produce a findings backlog before editing code.
+8. If work starts from a backlog item, issue, accepted finding, or broad human
+   request, run `make agent-task-packet` and convert one selected item into
+   scoped executable work before implementation.
 
 The prompts under `.codex/prompts/` are local copies installed by
 `repo-contract-kit`. Do not fetch prompts from another repo during normal work
@@ -45,6 +52,26 @@ If you change any of the following, update the relevant docs in the same change:
 If no documentation update is needed, explicitly say why in the PR summary.
 Use the exact marker `No docs needed: <reason>`.
 
+## Versioning contract
+
+If this repo has `VERSION`, `CHANGELOG.md`, and `docs/versioning.md`, treat
+`VERSION` as the local SemVer source of truth. Run `make version-check` when a
+change affects behavior, APIs, CLI, configuration, schemas, operations, or
+user-visible output. Use `make version-bump BUMP=patch|minor|major` only when a
+version bump is part of the accepted change scope, then replace the changelog
+TODO with a useful summary.
+
+`VERSION` and `CHANGELOG.md` are target-owned files. Do not overwrite them from
+kit templates during updates.
+
+## Kit updates
+
+Use `make kit-status` to inspect the installed kit version, source ref, profiles,
+manifest status, and target repo version. Use
+`make kit-update KIT=/path/to/repo-contract-kit` only when the user asks to
+refresh the local kit files. Customized managed files must be preserved; review
+proposed replacements under `.doc-contract-kit/updates/`.
+
 ## ADR rules
 
 Create or update an ADR when the change affects:
@@ -66,6 +93,7 @@ Before finishing work, run:
 - `make docs-build`
 - `make docs-generate`
 - `python3 scripts/check_doc_impact.py`
+- `make version-check` when behavior or release impact changed
 
 If these fail, fix the issue before considering the task complete.
 

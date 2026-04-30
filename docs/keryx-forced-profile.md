@@ -7,6 +7,12 @@ The repository remains the durable mirror. The mirror lets fresh clones, local
 checks, Codex, AmpCode, Claude Code, and other local agents read the same state
 even when they cannot access the local Keryx workspace directly.
 
+Keryx owns backlog prioritisation. `docs/backlog.md` mirrors that queue for Git
+history and clone portability. The executable surface is a task packet: select
+one backlog item, then use `.codex/prompts/task-packet.md` or
+`make agent-task-packet` to define scope, acceptance criteria, validation,
+documentation impact, risk, and approval before implementation.
+
 ## Installed Files
 
 The profile installs:
@@ -21,6 +27,7 @@ The profile installs:
 - `scripts/localize_doc_impact.py`
 - `REVIEW.md`
 - `.agent-workflows/`
+- `.codex/prompts/task-packet.md` when the review-prompts profile is composed
 - a Keryx-aware `Makefile`
 - a Keryx-aware `AGENTS.md`
 - a local-only pre-commit config with doc-contract, Keryx sync, and agent
@@ -29,11 +36,13 @@ The profile installs:
 ## Commit Lifecycle
 
 1. Update code and repository docs.
-2. Stage the intended commit contents.
-3. Sync the staged state through Keryx.
-4. Keryx writes `.keryx/sync.json`.
-5. Stage `.keryx/sync.json`.
-6. Commit after pre-commit passes.
+2. If work came from a backlog item, convert it into a task packet before
+   implementation.
+3. Stage the intended commit contents.
+4. Sync the staged state through Keryx.
+5. Keryx writes `.keryx/sync.json`.
+6. Stage `.keryx/sync.json`.
+7. Commit after pre-commit passes.
 
 The Keryx hook validates that the staged project files, configured mirror docs,
 current `HEAD`, and sync receipt agree.

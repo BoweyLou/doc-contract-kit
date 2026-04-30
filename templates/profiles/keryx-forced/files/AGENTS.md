@@ -28,6 +28,11 @@ Keryx is the working cockpit for backlog, architecture, plan, and handoff state.
 The repo keeps a durable mirror so fresh clones, local checks, Codex, AmpCode,
 Claude Code, and other local agents still have the same context.
 
+Backlog prioritisation belongs in Keryx. `docs/backlog.md` is the portable repo
+mirror, not a separate backlog app. Before implementing a selected backlog item,
+run `make agent-task-packet` and use `.codex/prompts/task-packet.md` to turn that
+one item into scoped executable work.
+
 Before committing, sync the current staged state through Keryx and stage the
 updated `.keryx/sync.json` receipt. The pre-commit hook must block stale or
 missing Keryx receipts.
@@ -72,6 +77,7 @@ Before finishing work, run:
 - `python3 scripts/check_keryx_sync.py --staged`
 - `python3 scripts/lint_agent_docs.py --strict-paths`
 - `python3 scripts/localize_doc_impact.py --working-tree --json`
+- `make agent-task-packet` when starting from a backlog item or Keryx task
 
 If these fail, fix the issue before considering the task complete.
 

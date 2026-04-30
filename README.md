@@ -18,6 +18,8 @@ tests, receipts, and tool-agnostic workflows.
 - agent instruction linting for local prompt/rule files
 - evidence receipt and safe-output schemas
 - TDD/executable-spec workflow profiles
+- safe local kit updates with managed-file conflict reports
+- default local SemVer files and version commands for agentic target repos
 - beginner-friendly docs explaining PRs, CI, hooks, ADRs, and agent instructions
 - a Hermes skill stub for later automation
 
@@ -28,7 +30,7 @@ This repository is the install layer:
 - `AGENTS.md` and `REVIEW.md` templates
 - docs-impact checks and waivers
 - local `make` targets
-- profile installation and upgrade receipts
+- profile installation, managed manifests, and update receipts
 - local agent workflow files under `.agent-workflows/`
 - tool-agnostic schemas and safe-output boundaries
 
@@ -90,17 +92,38 @@ tmp="$(mktemp -d)" && git clone --depth 1 https://github.com/BoweyLou/repo-contr
 Then inside the target repo:
 
 ```bash
+make agent-start
+make kit-status
 make docs-check
 make agent-docs-lint
 make agent-docs-localize
 make agent-review
+make agent-task-packet
 make agent-test-first
+make version-check
 ```
 
 ## Start an Agent in an Existing Repo
 
-After installing the `agentic` preset, point Codex, AmpCode, or another local
-coding agent at the target repo and give it this brief:
+After installing the `agentic` preset, generate a local session packet:
+
+```bash
+make agent-start
+```
+
+Use `MODE` when you already know the session type:
+
+```bash
+make agent-start MODE=drift
+make agent-start MODE=test-first
+```
+
+The command writes an ignored local packet under `.agent-workflows/runs/` with
+an agent brief, machine-readable startup context, and a receipt template. It
+records failed discovery checks as warnings instead of blocking startup.
+
+If you want to start manually, point Codex, AmpCode, or another local coding
+agent at the target repo and give it this brief:
 
 ```text
 Read AGENTS.md, REVIEW.md, and .agent-workflows/README.md.
@@ -118,6 +141,58 @@ repo under `.codex/prompts/`. The companion
 [agent-workflow-kit](https://github.com/BoweyLou/agent-workflow-kit) repo is the
 canonical place to improve those prompts, but target repos do not need to clone
 or fetch it at runtime.
+
+## Updating An Installed Repo
+
+Installs write `.doc-contract-kit/install.json` and
+`.doc-contract-kit/manifest.json`. The manifest records the managed files,
+their source templates, hashes, installed kit version, and source ref.
+
+From the target repo, check what is installed:
+
+```bash
+make kit-status
+```
+
+To update from a local kit checkout:
+
+```bash
+make kit-update KIT=/path/to/repo-contract-kit
+```
+
+The updater is safe by default. It overwrites a kit-managed file only when the
+target file still matches the last installed hash. If the target file was
+customized, it is preserved and a proposed replacement plus report is written
+under `.doc-contract-kit/updates/`.
+
+For internet-enabled repos that do not keep the kit cloned:
+
+```bash
+tmp="$(mktemp -d)" && git clone --depth 1 https://github.com/BoweyLou/repo-contract-kit "$tmp/repo-contract-kit" && make kit-update KIT="$tmp/repo-contract-kit"
+```
+
+If a legacy install has no manifest, the first update run adopts current file
+hashes without overwriting. Re-run the update command after adoption to apply
+safe updates.
+
+## Versioning
+
+The kit itself uses root `VERSION` plus `CHANGELOG.md`. Release tags should use
+SemVer names such as `v0.3.0` when tags are available, but tags are not required
+for locked-down environments.
+
+The `agentic` and `strict-agentic` presets include the `versioning` profile. It
+creates target repo `VERSION`, `CHANGELOG.md`, `docs/versioning.md`, and these
+commands:
+
+```bash
+make version-status
+make version-check
+make version-bump BUMP=patch
+```
+
+`VERSION` and `CHANGELOG.md` are target-owned after creation, so kit updates do
+not overwrite the project version history.
 
 If the target repo uses pre-commit hooks:
 
@@ -151,7 +226,7 @@ Presets are the easiest way to install a coherent operating mode:
 - `learning`: documentation contract plus review and learning prompts.
 - `test-first`: documentation contract plus TDD/executable-spec prompts.
 - `agentic`: documentation contract, local agent workflows, review prompts,
-  learning prompts, and test-first prompts.
+  learning prompts, test-first prompts, and local versioning.
 - `strict-agentic`: `agentic` plus the forced Keryx cockpit profile.
 
 ## What gets installed
@@ -169,9 +244,17 @@ The kit currently installs:
 - `.pre-commit-config.yaml`
 - `Makefile`
 - `scripts/check_doc_impact.py`
+- `scripts/agent_start.py`
+- `scripts/kit_status.py`
 - `scripts/lint_agent_docs.py`
 - `scripts/localize_doc_impact.py`
+- `scripts/version.py`
+- `schemas/task-packet.schema.json`
 - `.agent-workflows/schemas/safe-output.schema.json`
+- `.agent-workflows/runs/.gitignore`
+- `.doc-contract-kit/install.json`
+- `.doc-contract-kit/manifest.json`
+- `.doc-contract-kit/updates/.gitignore`
 
 The default profile is `minimal`, which keeps target repos portable and does not
 assume a local knowledge-base tool.
@@ -192,6 +275,7 @@ The `review-prompts` profile also installs:
 
 - `.codex/prompts/multi-agent-repo-review.md`
 - `.codex/prompts/codebase-learning-comments.md`
+- `.codex/prompts/task-packet.md`
 - `.codex/prompts/personas/`
 - `.codex/prompts/templates/`
 - remediation and verification prompts
@@ -205,6 +289,15 @@ The `local-agentic` profile also installs:
 
 Use this profile when the repo must work with local tools only and cannot assume
 GitHub Actions, cloud CI, or one specific agent runtime.
+
+The `versioning` profile also installs:
+
+- `VERSION`
+- `CHANGELOG.md`
+- `docs/versioning.md`
+
+These files are included by the `agentic` and `strict-agentic` presets. Existing
+target `VERSION` and `CHANGELOG.md` files are preserved.
 
 ## Configuration
 
@@ -231,6 +324,11 @@ Keryx state so fresh clones and CI can see the same context. Commits are blocked
 locally unless `.keryx/sync.json` matches the current staged tree and configured
 mirror docs.
 
+Keryx owns backlog prioritisation. `docs/backlog.md` is the portable repository
+mirror. Before implementing a selected backlog item, use `make
+agent-task-packet` to turn it into scoped executable work with acceptance
+criteria, validation, documentation impact, risk, and approval state.
+
 See `docs/keryx-forced-profile.md` for the expected lifecycle.
 
 The `test-first` profile also installs:
@@ -247,6 +345,13 @@ features, bug fixes, refactors, API contracts, and high-risk cleanup.
 
 Installed target repos get Makefile entrypoints:
 
+- `make agent-start`: write an ignored local session packet with an agent
+  brief, startup context, latest ADR context, kit/version context, recommended
+  prompts/personas, and a receipt template.
+- `make kit-status`: show installed kit version, source ref, profiles, managed
+  manifest status, and target repo version.
+- `make kit-update KIT=/path/to/repo-contract-kit`: safely update managed files
+  from a newer local kit checkout.
 - `make docs-check`: run the documentation contract checks.
 - `make agent-docs-lint`: check local agent instruction files for hidden
   Unicode, stale paths, and unsafe references.
@@ -254,12 +359,19 @@ Installed target repos get Makefile entrypoints:
   documentation impact.
 - `make agent-review`: point the agent at the multi-agent repo review prompt.
 - `make agent-learn`: point the agent at the learner-focused comment prompt.
+- `make agent-task-packet`: point the agent at the task-packet prompt for
+  backlog items, issues, accepted findings, and broad human requests.
 - `make agent-test-first`: point the agent at the TDD/executable-spec prompt chooser.
 - `make agent-verify`: run the verification checks currently available in the installed profile.
+- `make version-status`: print the target repo version.
+- `make version-check`: validate local SemVer.
+- `make version-bump BUMP=patch|minor|major`: update `VERSION` and add a
+  changelog stub.
 
-The installer also writes `.doc-contract-kit/install.json` so later upgrades can
-see which profiles or preset were installed. That compatibility path keeps
-existing installations stable even though the public project name is
+The installer writes `.doc-contract-kit/install.json` and
+`.doc-contract-kit/manifest.json` so later updates can see which profiles or
+preset were installed and which files are safe to manage. The compatibility path
+keeps existing installations stable even though the public project name is
 repo-contract-kit.
 
 ## Recommended rollout

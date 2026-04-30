@@ -12,6 +12,7 @@ Markdown files directly from the checkout.
 - `multi-agent-repo-review.md`: Orchestrates repo mapping, reviewer dispatch, and review boundaries.
 - `codebase-learning-comments.md`: Uses subagents to understand docs, ADRs, and code before adding learner-friendly comments.
 - `review-synthesis.md`: Merges persona outputs into one ranked action plan.
+- `task-packet.md`: Converts backlog items, issues, accepted findings, or broad requests into executable work packets.
 - `fix-planner.md`: Converts accepted findings into scoped implementation batches.
 - `fix-implementer.md`: Applies a selected batch without widening scope.
 - `verification-sentinel.md`: Validates claims, tests, and residual risk after remediation.
@@ -39,8 +40,11 @@ findings.
 
 - `templates/review-finding.md`: Shared finding format for reviewer outputs.
 - `templates/agent-brief.md`: Fill-in brief for launching a focused reviewer.
+- `templates/task-packet.md`: Fill-in template for backlog-to-work handoff.
 - `schemas/session-receipt.schema.json`: Local run receipt schema for
   commands, docs impact, TDD evidence, findings, and final disposition.
+- `schemas/task-packet.schema.json`: Machine-readable task packet schema for
+  scope, acceptance criteria, validation, docs impact, risk, and approval state.
 - `schemas/persona-manifest.schema.json`: Validator schema for the persona
   manifest.
 

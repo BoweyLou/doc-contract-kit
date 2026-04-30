@@ -28,6 +28,13 @@ covers the broader local repository contract for agentic development.
 
 ## v0.3
 
+- root kit `VERSION` and `CHANGELOG.md`
+- managed install manifest with per-file hashes
+- safe local updater with conflict reports under `.doc-contract-kit/updates/`
+- target-repo `kit-status` and `kit-update` commands
+- default target-repo versioning profile for agentic installs
+- `agent-start` kit/version context
+- task-packet prompt/schema bridge for Keryx and repo backlog mirrors
 - compatibility notes for existing `.doc-contract-kit/` install receipts
 - clearer relationship with agent-workflow-kit
 - generated docs integration

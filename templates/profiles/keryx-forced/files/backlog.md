@@ -2,8 +2,14 @@
 
 This file is the repository mirror of the Keryx backlog.
 
-Keryx is the working cockpit for backlog triage and prioritisation. Keep this
-file as the commit-friendly copy that travels with the repository.
+Keryx is the working cockpit for backlog triage and prioritisation. This file is
+the commit-friendly mirror that travels with the repository so fresh clones,
+reviewers, and local agents can see the same high-level work queue.
+
+Do not treat this file as a standalone backlog product. Pick the next item in
+Keryx or this mirror, then run `make agent-task-packet` to convert that single
+item into an executable task packet with scope, acceptance criteria, validation,
+documentation impact, risk, and approval state.
 
 ## Current
 

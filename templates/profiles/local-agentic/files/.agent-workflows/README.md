@@ -10,6 +10,17 @@ a human terminal session.
 
 Give the agent this brief from the repository root:
 
+```bash
+make agent-start
+```
+
+The command writes an ignored local packet under `.agent-workflows/runs/` with
+an agent brief, startup context, latest ADR context, recommended prompts and
+personas, kit version context, target repo version context, and a receipt
+template.
+
+For manual startup, use:
+
 ```text
 Read AGENTS.md, REVIEW.md, and .agent-workflows/README.md.
 Then follow .agent-workflows/repo-review.md in bootstrap mode.
@@ -29,24 +40,54 @@ For ongoing work after the first bootstrap review, change `bootstrap mode` to
 - `.agent-workflows/tdd-red-green-receipt.md`: TDD evidence format.
 - `.agent-workflows/schemas/session-receipt.schema.json`: JSON receipt schema.
 - `.agent-workflows/schemas/safe-output.schema.json`: safe agent output schema.
+- `schemas/task-packet.schema.json`: JSON schema for backlog-to-work handoff.
 
 ## Local Commands
 
 Run these from the repository root:
 
 ```bash
+make agent-start
+make kit-status
 make docs-check
 make agent-docs-lint
 make agent-docs-localize
+make agent-task-packet
+make version-check
 ```
 
 If your repo does not use `make`, run the scripts directly:
 
 ```bash
 python3 scripts/check_doc_impact.py --working-tree
+python3 scripts/agent_start.py --mode bootstrap
+python3 scripts/kit_status.py
 python3 scripts/lint_agent_docs.py --strict-paths
 python3 scripts/localize_doc_impact.py --working-tree --json
+python3 scripts/version.py check
 ```
+
+Use `make agent-task-packet` when a backlog item, Keryx task, issue, review
+finding, or human request needs scope, acceptance criteria, docs impact, risk,
+and approval state before implementation.
+
+## Updates And Versioning
+
+The installed `.doc-contract-kit/manifest.json` records which files are
+kit-managed and which files are target-owned. To update from a newer local kit
+checkout, run:
+
+```bash
+make kit-update KIT=/path/to/repo-contract-kit
+```
+
+The updater only replaces clean managed files. Customized files are preserved and
+reported under `.doc-contract-kit/updates/`.
+
+When `VERSION` and `CHANGELOG.md` exist, they belong to this target repo. Agents
+should run `make version-check` for behavior/API/config/runtime changes and only
+run `make version-bump BUMP=patch|minor|major` when a version bump is part of
+the accepted task.
 
 ## Tool-Neutral Rule
 

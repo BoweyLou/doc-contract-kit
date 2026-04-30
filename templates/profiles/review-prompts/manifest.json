@@ -75,12 +75,20 @@
       "target": ".codex/prompts/review-synthesis.md"
     },
     {
+      "source": "files/.codex/prompts/task-packet.md",
+      "target": ".codex/prompts/task-packet.md"
+    },
+    {
       "source": "files/.codex/prompts/templates/agent-brief.md",
       "target": ".codex/prompts/templates/agent-brief.md"
     },
     {
       "source": "files/.codex/prompts/templates/review-finding.md",
       "target": ".codex/prompts/templates/review-finding.md"
+    },
+    {
+      "source": "files/.codex/prompts/templates/task-packet.md",
+      "target": ".codex/prompts/templates/task-packet.md"
     },
     {
       "source": "files/.codex/prompts/verification-sentinel.md",

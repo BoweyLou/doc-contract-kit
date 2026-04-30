@@ -1,4 +1,8 @@
-.PHONY: docs-lint docs-build docs-generate docs-check agent-docs-lint agent-docs-localize agent-review agent-learn agent-test-first agent-verify
+MODE ?= bootstrap
+BUMP ?= patch
+KIT ?=
+
+.PHONY: docs-lint docs-build docs-generate docs-check agent-start agent-docs-lint agent-docs-localize agent-review agent-learn agent-task-packet agent-test-first agent-verify kit-status kit-update version-status version-check version-bump
 
 docs-lint:
 	@echo "Running basic docs lint checks..."
@@ -15,13 +19,32 @@ docs-generate:
 	@echo "No generated docs configured yet. Skipping generation."
 
 docs-check: docs-lint docs-build docs-generate
-	@python3 scripts/check_doc_impact.py
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/check_doc_impact.py
+
+agent-start:
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_start.py --mode "$(MODE)"
+
+kit-status:
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/kit_status.py
+
+kit-update:
+	@test -n "$(KIT)" || (echo "Set KIT=/path/to/repo-contract-kit"; exit 1)
+	@PYTHONDONTWRITEBYTECODE=1 python3 "$(KIT)/scripts/update.py" "$(CURDIR)"
+
+version-status:
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/version.py status
+
+version-check:
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/version.py check
+
+version-bump:
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/version.py bump --bump "$(BUMP)"
 
 agent-docs-lint:
-	@python3 scripts/lint_agent_docs.py --strict-paths
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/lint_agent_docs.py --strict-paths
 
 agent-docs-localize:
-	@python3 scripts/localize_doc_impact.py --working-tree --json
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/localize_doc_impact.py --working-tree --json
 
 agent-review:
 	@if test -f .agent-workflows/repo-review.md; then \
@@ -44,6 +67,10 @@ agent-review:
 agent-learn:
 	@test -f .codex/prompts/codebase-learning-comments.md || (echo "Missing .codex/prompts/codebase-learning-comments.md; install the review-prompts profile." && exit 1)
 	@echo "Use .codex/prompts/codebase-learning-comments.md for learner-focused comments."
+
+agent-task-packet:
+	@test -f .codex/prompts/task-packet.md || (echo "Missing .codex/prompts/task-packet.md; install the review-prompts profile." && exit 1)
+	@echo "Use .codex/prompts/task-packet.md to convert a backlog item, issue, accepted finding, or human request into executable agent work."
 
 agent-test-first:
 	@test -f .codex/prompts/tdd/README.md || (echo "Missing .codex/prompts/tdd/README.md; install the test-first profile." && exit 1)
