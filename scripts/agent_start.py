@@ -298,10 +298,10 @@ def backlog_context(root):
         "task_packet_prompt": prompt_path if (root / prompt_path).exists() else None,
         "task_packet_schema": schema_path if (root / schema_path).exists() else None,
         "guidance": (
-            "Keryx owns backlog prioritisation; docs/backlog.md is the portable repo mirror. "
+            "Backlog prioritisation belongs in the repository planning source or external planning tool; docs/backlog.md is the portable repo mirror. "
             "Convert one selected backlog item into a task packet before implementation."
             if text is not None
-            else "No docs/backlog.md mirror found. Use the current user request, issue, or Keryx task as the task source."
+            else "No docs/backlog.md mirror found. Use the current user request, issue, or accepted finding as the task source."
         ),
     }
 
@@ -501,7 +501,7 @@ def build_brief(packet):
     else:
         backlog_guidance = (
             "- No backlog mirror was found under docs/backlog.md.\n"
-            "- Use a Keryx task, issue, accepted finding, or user request as the task source."
+            "- Use an issue, accepted finding, user request, or external planning item as the task source."
         )
 
     return f"""# Agent Start Brief

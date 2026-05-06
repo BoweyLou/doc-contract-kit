@@ -18,17 +18,6 @@ If this is all new to you, adopt it in layers.
 8. Add CI adapters only if your host supports them. The core workflow must still run locally.
 9. Later, add generated docs and executable doc tests.
 
-## Forced Keryx mode
-
-Use the `keryx-forced` profile only for repositories where Keryx should be the
-mandatory cockpit for backlog, architecture, plan, and handoff state.
-
-In that mode, Keryx writes a staged-state receipt and pre-commit blocks the
-commit if the receipt is missing or stale.
-
-Use `--preset strict-agentic` when you want the review prompts, test-first
-prompts, and forced Keryx profile together.
-
 ## Installed command surface
 
 After install, use these target-repo commands:
@@ -40,6 +29,7 @@ After install, use these target-repo commands:
 - `make agent-docs-lint`
 - `make agent-docs-localize`
 - `make agent-review`
+- `make agent-run-review AGENT=manual`
 - `make agent-learn`
 - `make agent-task-packet`
 - `make agent-test-first`
@@ -56,9 +46,14 @@ ignored session packet with the current repo state, docs-impact result, latest
 ADR context, recommended prompts/personas, and a receipt template for the
 agent's final evidence.
 
-Use `make agent-task-packet` when a backlog row, Keryx task, issue, accepted
-finding, or broad request needs to become one executable unit of work before an
-agent edits files.
+Use `make agent-run-review AGENT=manual` to turn the latest session packet into
+one prompt per selected reviewer plus review-run JSON artifacts. Use
+`AGENT=amp` only when Amp CLI is available and you want the wrapper to execute
+the read-only personas with `amp --execute --stream-json`.
+
+Use `make agent-task-packet` when a backlog row, issue, accepted finding,
+external planning item, or broad request needs to become one executable unit of
+work before an agent edits files.
 
 Use `make kit-status` when returning to a repo after some time. It shows the
 installed kit version, source ref, selected profiles, target repo version, and
@@ -70,8 +65,8 @@ preserved, and proposed replacements are written under
 `.doc-contract-kit/updates/` for review. If the repo is a legacy install without
 a manifest, the first run adopts current hashes without overwriting files.
 
-The `agentic` and `strict-agentic` presets include the `versioning` profile.
-That profile creates local SemVer files when missing and keeps `VERSION` and
+The `agentic` preset includes the `versioning` profile. That profile creates
+local SemVer files when missing and keeps `VERSION` and
 `CHANGELOG.md` target-owned so updates never overwrite project release history.
 
 ## Start small

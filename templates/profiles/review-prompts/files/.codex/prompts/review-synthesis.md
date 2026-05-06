@@ -59,4 +59,17 @@ Summarize the local receipt fields that should be written to
 `session-receipt.json`: agent tool, mode, changed files, files inspected,
 commands run, docs-impact result, TDD red/green evidence, findings, and final
 disposition.
+
+## Machine-Readable Synthesis
+When a runner or another tool asks for JSON, return only JSON matching
+`schemas/review-synthesis.schema.json`.
+
+Use these rules for the JSON artifact:
+- `summary` contains 1-5 concise bullets.
+- `findings` contains only evidence-backed findings.
+- `priority` uses `P0`-`P3`; `severity` uses `blocker`, `high`, `medium`, or `low`.
+- `source_personas` names the reviewer persona ids that produced or supported the finding.
+- `file` and `line` are nullable when a finding is repo-level rather than line-specific.
+- `status` starts as `open` unless the synthesis explicitly accepts, rejects, defers, fixes, or deduplicates it.
+- `not_recommended` records speculative, too-broad, or unsupported suggestions so later runs do not rediscover them as noise.
 ```

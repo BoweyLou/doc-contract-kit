@@ -22,6 +22,10 @@ DEFAULT_GLOBS = [
     ".windsurf/rules/**/*.md",
 ]
 
+IGNORED_PATH_PARTS = {
+    ".agent-workflows/runs",
+}
+
 HIDDEN_CODEPOINTS = {
     "\u200b": "zero width space",
     "\u200c": "zero width non-joiner",
@@ -84,6 +88,8 @@ def normalize_candidate(value: str):
         return None
     if candidate.startswith(("$", "<", "{")):
         return None
+    if any(marker in candidate for marker in ("<", ">", "*")):
+        return None
     return candidate
 
 
@@ -112,6 +118,9 @@ def discover_files(root: Path, explicit_files: list[str]):
     if not explicit_files:
         for pattern in DEFAULT_GLOBS:
             for path in root.glob(pattern):
+                rel = str(path.relative_to(root))
+                if any(rel == ignored or rel.startswith(f"{ignored}/") for ignored in IGNORED_PATH_PARTS):
+                    continue
                 if path.is_file():
                     paths.append(path)
 

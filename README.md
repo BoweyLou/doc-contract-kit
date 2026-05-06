@@ -98,6 +98,7 @@ make docs-check
 make agent-docs-lint
 make agent-docs-localize
 make agent-review
+make agent-run-review AGENT=manual
 make agent-task-packet
 make agent-test-first
 make version-check
@@ -135,6 +136,24 @@ Produce a findings backlog before editing code.
 
 You can also run `make agent-review` in the target repo to print this brief
 locally.
+
+To materialize a read-only review run, use:
+
+```bash
+make agent-run-review AGENT=manual
+```
+
+Manual mode creates prompts and placeholder JSON artifacts under the latest
+`.agent-workflows/runs/<id>/review-run/` directory. When Amp is installed and
+signed in, use:
+
+```bash
+make agent-run-review AGENT=amp
+```
+
+The Amp adapter calls `amp --execute --stream-json`, saves raw output, extracts
+JSON findings, runs synthesis, and fails the run if git status changes during a
+read-only reviewer or synthesis call.
 
 The installer copies a vendored snapshot of the prompt library into the target
 repo under `.codex/prompts/`. The companion
@@ -181,9 +200,8 @@ The kit itself uses root `VERSION` plus `CHANGELOG.md`. Release tags should use
 SemVer names such as `v0.3.0` when tags are available, but tags are not required
 for locked-down environments.
 
-The `agentic` and `strict-agentic` presets include the `versioning` profile. It
-creates target repo `VERSION`, `CHANGELOG.md`, `docs/versioning.md`, and these
-commands:
+The `agentic` preset includes the `versioning` profile. It creates target repo
+`VERSION`, `CHANGELOG.md`, `docs/versioning.md`, and these commands:
 
 ```bash
 make version-status
@@ -198,12 +216,6 @@ If the target repo uses pre-commit hooks:
 
 ```bash
 pre-commit install
-```
-
-To install the forced Keryx cockpit profile:
-
-```bash
-python3 scripts/install.py /path/to/target/repo --profile keryx-forced
 ```
 
 To install the test-first executable-spec profile:
@@ -227,7 +239,6 @@ Presets are the easiest way to install a coherent operating mode:
 - `test-first`: documentation contract plus TDD/executable-spec prompts.
 - `agentic`: documentation contract, local agent workflows, review prompts,
   learning prompts, test-first prompts, and local versioning.
-- `strict-agentic`: `agentic` plus the forced Keryx cockpit profile.
 
 ## What gets installed
 
@@ -259,18 +270,6 @@ The kit currently installs:
 The default profile is `minimal`, which keeps target repos portable and does not
 assume a local knowledge-base tool.
 
-The `keryx-forced` profile also installs:
-
-- `.keryx/config.json`
-- `.keryx/sync.example.json`
-- `docs/backlog.md`
-- `docs/architecture.md`
-- `docs/plan.md`
-- `scripts/check_keryx_sync.py`
-- a stricter `AGENTS.md`
-- a Keryx-aware `Makefile`
-- a pre-commit config that runs both the docs contract and Keryx sync receipt checks
-
 The `review-prompts` profile also installs:
 
 - `.codex/prompts/multi-agent-repo-review.md`
@@ -296,8 +295,8 @@ The `versioning` profile also installs:
 - `CHANGELOG.md`
 - `docs/versioning.md`
 
-These files are included by the `agentic` and `strict-agentic` presets. Existing
-target `VERSION` and `CHANGELOG.md` files are preserved.
+These files are included by the `agentic` preset. Existing target `VERSION` and
+`CHANGELOG.md` files are preserved.
 
 ## Configuration
 
@@ -313,23 +312,6 @@ The checker fails when it detects doc-impacting changes without matching
 documentation updates. If a change genuinely needs no docs, the PR body must
 include `No docs needed: <reason>`, or CI/local automation must provide
 `DOC_CONTRACT_NO_DOCS_NEEDED`.
-
-## Forced Keryx profile
-
-Use `--profile keryx-forced` when Keryx should be the mandatory operating
-surface for backlog, architecture, plan, and handoff state.
-
-In that profile, the repository still keeps a one-to-one Markdown mirror of the
-Keryx state so fresh clones and CI can see the same context. Commits are blocked
-locally unless `.keryx/sync.json` matches the current staged tree and configured
-mirror docs.
-
-Keryx owns backlog prioritisation. `docs/backlog.md` is the portable repository
-mirror. Before implementing a selected backlog item, use `make
-agent-task-packet` to turn it into scoped executable work with acceptance
-criteria, validation, documentation impact, risk, and approval state.
-
-See `docs/keryx-forced-profile.md` for the expected lifecycle.
 
 The `test-first` profile also installs:
 
@@ -358,6 +340,8 @@ Installed target repos get Makefile entrypoints:
 - `make agent-docs-localize`: emit JSON that maps changed files to likely
   documentation impact.
 - `make agent-review`: point the agent at the multi-agent repo review prompt.
+- `make agent-run-review AGENT=manual|amp`: generate persona review artifacts,
+  or execute them through Amp CLI when `AGENT=amp`.
 - `make agent-learn`: point the agent at the learner-focused comment prompt.
 - `make agent-task-packet`: point the agent at the task-packet prompt for
   backlog items, issues, accepted findings, and broad human requests.

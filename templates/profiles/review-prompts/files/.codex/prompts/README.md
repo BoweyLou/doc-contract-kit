@@ -43,6 +43,9 @@ findings.
 - `templates/task-packet.md`: Fill-in template for backlog-to-work handoff.
 - `schemas/session-receipt.schema.json`: Local run receipt schema for
   commands, docs impact, TDD evidence, findings, and final disposition.
+- `schemas/review-synthesis.schema.json`: Machine-readable synthesis schema for
+  ranked findings, remediation batches, human decisions, rejected suggestions,
+  and final disposition.
 - `schemas/task-packet.schema.json`: Machine-readable task packet schema for
   scope, acceptance criteria, validation, docs impact, risk, and approval state.
 - `schemas/persona-manifest.schema.json`: Validator schema for the persona

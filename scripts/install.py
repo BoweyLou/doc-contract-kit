@@ -18,7 +18,6 @@ PRESETS = {
     "learning": ["minimal", "review-prompts"],
     "test-first": ["minimal", "test-first"],
     "agentic": ["minimal", "local-agentic", "review-prompts", "test-first", "versioning"],
-    "strict-agentic": ["minimal", "local-agentic", "review-prompts", "test-first", "versioning", "keryx-forced"],
 }
 
 FILE_MAP = {
@@ -33,6 +32,7 @@ FILE_MAP = {
     "pre-commit-config.yaml": ".pre-commit-config.yaml",
     "Makefile": "Makefile",
     "session-receipt.schema.json": "schemas/session-receipt.schema.json",
+    "review-synthesis.schema.json": "schemas/review-synthesis.schema.json",
     "task-packet.schema.json": "schemas/task-packet.schema.json",
     "persona-manifest.schema.json": "schemas/persona-manifest.schema.json",
     "safe-output.schema.json": ".agent-workflows/schemas/safe-output.schema.json",
@@ -42,6 +42,7 @@ FILE_MAP = {
 
 CORE_SCRIPTS = [
     "agent_start.py",
+    "agent_review_run.py",
     "check_doc_impact.py",
     "kit_status.py",
     "lint_agent_docs.py",
@@ -359,10 +360,8 @@ def main():
     print("  make kit-status")
     print("  make docs-check")
     print("  pre-commit install")
-    if "keryx-forced" in profiles:
-        print("  sync staged changes through Keryx before committing")
     if "review-prompts" in profiles:
-        print("  run make agent-review or make agent-learn when you want agent guidance")
+        print("  run make agent-review, make agent-run-review, or make agent-learn when you want agent guidance")
     if "test-first" in profiles:
         print("  review docs/testing-strategy.md and .codex/prompts/tdd/ before the next behavior change")
     if "local-agentic" in profiles:

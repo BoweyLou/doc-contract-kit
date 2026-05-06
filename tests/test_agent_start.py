@@ -106,11 +106,16 @@ class AgentStartTests(unittest.TestCase):
             self.assertIn("Kit And Versioning", brief)
             self.assertIn("Backlog And Task Packets", brief)
 
-    def test_strict_agentic_packet_includes_backlog_mirror_context(self):
+    def test_agentic_packet_includes_backlog_mirror_context(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
             init_repo(repo)
-            install(repo, "strict-agentic")
+            install(repo, "agentic")
+            (repo / "docs").mkdir(exist_ok=True)
+            (repo / "docs" / "backlog.md").write_text(
+                "# Backlog\n\n- [ ] AGW-001 Add a portable review runner\n",
+                encoding="utf-8",
+            )
             commit_all(repo)
 
             result = run([sys.executable, "scripts/agent_start.py"], repo)

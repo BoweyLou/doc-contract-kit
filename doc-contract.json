@@ -17,8 +17,7 @@
   ],
   "impact_rules": {
     "checker": [
-      "scripts/check_doc_impact.py",
-      "scripts/check_keryx_sync.py"
+      "scripts/check_doc_impact.py"
     ],
     "installer": [
       "scripts/install.py"

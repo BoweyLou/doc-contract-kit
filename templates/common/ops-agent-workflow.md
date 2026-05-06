@@ -38,8 +38,9 @@ files are preserved and proposed replacements are written under
 `.doc-contract-kit/updates/`.
 
 `make agent-task-packet` points the agent at the task-packet prompt. Use it when
-a backlog row, Keryx task, issue, accepted review finding, or broad human
-request needs to become scoped executable work before implementation starts.
+a backlog row, issue, accepted review finding, external planning item, or broad
+human request needs to become scoped executable work before implementation
+starts.
 
 `make version-check` validates the target repo `VERSION` file when the
 versioning profile is installed. Use `make version-bump BUMP=patch|minor|major`

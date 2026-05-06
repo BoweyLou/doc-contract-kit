@@ -30,7 +30,6 @@ Use this when:
    - `learning` for docs plus review/learning prompts.
    - `test-first` for docs plus executable-spec prompts.
    - `agentic` for docs, review prompts, learning prompts, and test-first prompts.
-   - `strict-agentic` when Keryx must be the mandatory cockpit as well.
 4. Install or update the starter files and `doc-contract.json` from repo-contract-kit.
 5. Explain what was installed in beginner-friendly language.
 6. Run `make docs-check` if the target repo has the installed files.

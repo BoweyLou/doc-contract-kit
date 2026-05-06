@@ -103,56 +103,6 @@ class InstallTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Target is not a git repository", result.stderr)
 
-    def test_install_keryx_forced_profile_writes_forced_sync_files(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            target = Path(tmp) / "target"
-            target.mkdir()
-            (target / ".git").mkdir()
-
-            result = subprocess.run(
-                [sys.executable, str(INSTALL), str(target), "--profile", "keryx-forced"],
-                cwd=ROOT,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertTrue((target / ".keryx" / "config.json").exists())
-            self.assertTrue((target / ".keryx" / "sync.example.json").exists())
-            self.assertTrue((target / "docs" / "backlog.md").exists())
-            self.assertTrue((target / "docs" / "architecture.md").exists())
-            self.assertTrue((target / "docs" / "plan.md").exists())
-            self.assertTrue((target / "scripts" / "check_keryx_sync.py").exists())
-
-            pre_commit = (target / ".pre-commit-config.yaml").read_text(encoding="utf-8")
-            self.assertIn("scripts/check_doc_impact.py --staged", pre_commit)
-            self.assertIn("scripts/check_keryx_sync.py --staged", pre_commit)
-
-            agents = (target / "AGENTS.md").read_text(encoding="utf-8")
-            self.assertIn("forced Keryx project-state sync", agents)
-
-            makefile = (target / "Makefile").read_text(encoding="utf-8")
-            self.assertIn("scripts/check_keryx_sync.py --staged", makefile)
-
-    def test_install_default_profile_does_not_write_keryx_files(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            target = Path(tmp) / "target"
-            target.mkdir()
-            (target / ".git").mkdir()
-
-            result = subprocess.run(
-                [sys.executable, str(INSTALL), str(target)],
-                cwd=ROOT,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertFalse((target / ".keryx").exists())
-            self.assertFalse((target / "scripts" / "check_keryx_sync.py").exists())
-
     def test_install_test_first_profile_writes_executable_spec_files(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "target"
@@ -232,6 +182,7 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((target / ".agent-workflows" / "repo-review.md").exists())
             self.assertTrue((target / ".agent-workflows" / "schemas" / "session-receipt.schema.json").exists())
             self.assertTrue((target / "schemas" / "task-packet.schema.json").exists())
+            self.assertTrue((target / "schemas" / "review-synthesis.schema.json").exists())
             self.assertTrue((target / "docs" / "ops" / "agent-workflow.md").exists())
             self.assertTrue((target / "VERSION").exists())
             self.assertTrue((target / "CHANGELOG.md").exists())
@@ -239,6 +190,7 @@ class InstallTests(unittest.TestCase):
 
             makefile = (target / "Makefile").read_text(encoding="utf-8")
             self.assertIn("agent-start:", makefile)
+            self.assertIn("agent-run-review:", makefile)
             self.assertIn("kit-status:", makefile)
             self.assertIn("kit-update:", makefile)
             self.assertIn("agent-review:", makefile)
@@ -254,6 +206,7 @@ class InstallTests(unittest.TestCase):
 
             for target_name in (
                 "agent-start",
+                "agent-run-review",
                 "kit-status",
                 "agent-review",
                 "agent-learn",
@@ -280,7 +233,20 @@ class InstallTests(unittest.TestCase):
                 if target_name == "agent-review":
                     self.assertIn("Read AGENTS.md, REVIEW.md", make_result.stdout)
                     self.assertIn(".agent-workflows/repo-review.md in bootstrap mode", make_result.stdout)
+                    self.assertIn("make agent-run-review AGENT=manual", make_result.stdout)
                     self.assertIn("Produce a findings backlog before editing code", make_result.stdout)
+
+                if target_name == "agent-run-review":
+                    self.assertIn("Agent review runner artifacts written", make_result.stdout)
+                    run_dirs = [
+                        path
+                        for path in (target / ".agent-workflows" / "runs").iterdir()
+                        if path.is_dir()
+                    ]
+                    self.assertTrue(run_dirs)
+                    latest = sorted(run_dirs)[-1]
+                    self.assertTrue((latest / "review-run" / "review-run.json").exists())
+                    self.assertTrue((latest / "review-run" / "synthesis" / "review-synthesis.json").exists())
 
             receipt = json.loads((target / ".doc-contract-kit" / "install.json").read_text(encoding="utf-8"))
             self.assertEqual(receipt["preset"], "agentic")
@@ -379,36 +345,6 @@ class InstallTests(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(status.stdout.strip(), "")
-
-    def test_install_strict_agentic_preset_composes_keryx_and_prompt_profiles(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            target = Path(tmp) / "target"
-            target.mkdir()
-            (target / ".git").mkdir()
-
-            result = subprocess.run(
-                [sys.executable, str(INSTALL), str(target), "--preset", "strict-agentic"],
-                cwd=ROOT,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertTrue((target / ".keryx" / "config.json").exists())
-            self.assertTrue((target / ".codex" / "prompts" / "multi-agent-repo-review.md").exists())
-            self.assertTrue((target / ".codex" / "prompts" / "tdd" / "README.md").exists())
-
-            makefile = (target / "Makefile").read_text(encoding="utf-8")
-            self.assertIn("keryx-check:", makefile)
-            self.assertIn("agent-review:", makefile)
-
-            receipt = json.loads((target / ".doc-contract-kit" / "install.json").read_text(encoding="utf-8"))
-            self.assertEqual(receipt["preset"], "strict-agentic")
-            self.assertEqual(
-                receipt["profiles"],
-                ["minimal", "local-agentic", "review-prompts", "test-first", "versioning", "keryx-forced"],
-            )
 
     def test_lint_agent_docs_detects_hidden_unicode(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -1,8 +1,10 @@
 MODE ?= bootstrap
 BUMP ?= patch
 KIT ?=
+AGENT ?= manual
+AMP ?= amp
 
-.PHONY: docs-lint docs-build docs-generate docs-check agent-start agent-docs-lint agent-docs-localize agent-review agent-learn agent-task-packet agent-test-first agent-verify kit-status kit-update version-status version-check version-bump
+.PHONY: docs-lint docs-build docs-generate docs-check agent-start agent-run-review agent-docs-lint agent-docs-localize agent-review agent-learn agent-task-packet agent-test-first agent-verify kit-status kit-update version-status version-check version-bump
 
 docs-lint:
 	@echo "Running basic docs lint checks..."
@@ -23,6 +25,9 @@ docs-check: docs-lint docs-build docs-generate
 
 agent-start:
 	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_start.py --mode "$(MODE)"
+
+agent-run-review:
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_review_run.py --mode "$(MODE)" --agent "$(AGENT)" --amp-command "$(AMP)"
 
 kit-status:
 	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/kit_status.py
@@ -53,12 +58,14 @@ agent-review:
 			"Then follow .agent-workflows/repo-review.md in bootstrap mode." \
 			"Use the installed personas and prompts under .codex/prompts/ where useful." \
 			"Start by running make agent-verify and make agent-docs-localize." \
+			"Optionally run make agent-run-review AGENT=manual to generate review artifacts." \
 			"Produce a findings backlog before editing code."; \
 	elif test -f .codex/prompts/multi-agent-repo-review.md; then \
 		printf "%s\n" \
 			"Read AGENTS.md and REVIEW.md." \
 			"Then follow .codex/prompts/multi-agent-repo-review.md in bootstrap mode." \
 			"Start by running make agent-verify and make agent-docs-localize." \
+			"Optionally run make agent-run-review AGENT=manual to generate review artifacts." \
 			"Produce a findings backlog before editing code."; \
 	else \
 		echo "Missing local review workflow; install the local-agentic or review-prompts profile."; exit 1; \

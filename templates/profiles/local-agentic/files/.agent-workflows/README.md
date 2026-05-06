@@ -19,6 +19,28 @@ an agent brief, startup context, latest ADR context, recommended prompts and
 personas, kit version context, target repo version context, and a receipt
 template.
 
+To generate a concrete review run folder from that packet:
+
+```bash
+make agent-run-review AGENT=manual
+```
+
+Manual mode writes one prompt per selected persona plus placeholder JSON
+artifacts under the latest `.agent-workflows/runs/<id>/review-run/` directory.
+Use it when you want to paste prompts into AmpCode, Codex, Claude Code, or a
+human review session yourself.
+
+When Amp is installed and signed in, execute the same review through Amp CLI
+execute mode:
+
+```bash
+make agent-run-review AGENT=amp
+```
+
+The Amp adapter uses `amp --execute --stream-json`, saves raw JSONL output,
+extracts structured findings, runs synthesis, and checks that git status did
+not change during each read-only reviewer run.
+
 For manual startup, use:
 
 ```text
@@ -40,6 +62,8 @@ For ongoing work after the first bootstrap review, change `bootstrap mode` to
 - `.agent-workflows/tdd-red-green-receipt.md`: TDD evidence format.
 - `.agent-workflows/schemas/session-receipt.schema.json`: JSON receipt schema.
 - `.agent-workflows/schemas/safe-output.schema.json`: safe agent output schema.
+- `schemas/review-synthesis.schema.json`: JSON schema for synthesized review
+  findings and remediation batches.
 - `schemas/task-packet.schema.json`: JSON schema for backlog-to-work handoff.
 
 ## Local Commands
@@ -48,6 +72,7 @@ Run these from the repository root:
 
 ```bash
 make agent-start
+make agent-run-review AGENT=manual
 make kit-status
 make docs-check
 make agent-docs-lint
@@ -61,6 +86,7 @@ If your repo does not use `make`, run the scripts directly:
 ```bash
 python3 scripts/check_doc_impact.py --working-tree
 python3 scripts/agent_start.py --mode bootstrap
+python3 scripts/agent_review_run.py --mode bootstrap --agent manual
 python3 scripts/kit_status.py
 python3 scripts/lint_agent_docs.py --strict-paths
 python3 scripts/localize_doc_impact.py --working-tree --json

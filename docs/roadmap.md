@@ -15,7 +15,6 @@ covers the broader local repository contract for agentic development.
 - upgrade script
 - configurable path classification
 - explicit no-docs-needed declaration support
-- forced Keryx profile for mirrored backlog, architecture, plan, and sync receipts
 - composable profiles and named presets
 - installed profile receipt
 - review-prompts and test-first profiles
@@ -34,13 +33,14 @@ covers the broader local repository contract for agentic development.
 - target-repo `kit-status` and `kit-update` commands
 - default target-repo versioning profile for agentic installs
 - `agent-start` kit/version context
-- task-packet prompt/schema bridge for Keryx and repo backlog mirrors
+- `agent-run-review` manual/Amp read-only review runner artifacts
+- task-packet prompt/schema bridge for repo backlog mirrors and external planning systems
 - compatibility notes for existing `.doc-contract-kit/` install receipts
 - clearer relationship with agent-workflow-kit
 - generated docs integration
 - executable docs checks
 - stack-aware template profiles
-- Hermes/Keryx skill automation
+- external planning and memory adapter examples
 - benchmark fixtures for docs-impact false positives and review noise
 
 ## v0.4
