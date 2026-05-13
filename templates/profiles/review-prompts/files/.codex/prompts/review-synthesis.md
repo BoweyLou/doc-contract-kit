@@ -29,6 +29,8 @@ Steps:
 5. Group fixes into small batches with clear ownership and low merge risk.
 6. Assign each finding a disposition: open, accepted, rejected, fixed, deferred, or duplicate.
 7. If a finding is rejected or deferred, record the reason so later runs do not rediscover it as noise.
+8. Include false-positive notes for each finding so later reviewers can see the
+   most plausible reason a claim might be harmless.
 
 Output:
 
@@ -71,5 +73,7 @@ Use these rules for the JSON artifact:
 - `source_personas` names the reviewer persona ids that produced or supported the finding.
 - `file` and `line` are nullable when a finding is repo-level rather than line-specific.
 - `status` starts as `open` unless the synthesis explicitly accepts, rejects, defers, fixes, or deduplicates it.
+- `false_positive_notes` records the most plausible reason the finding might be
+  harmless, or `none found` when no plausible false-positive explanation exists.
 - `not_recommended` records speculative, too-broad, or unsupported suggestions so later runs do not rediscover them as noise.
 ```

@@ -84,13 +84,17 @@ class AgentReviewRunTests(unittest.TestCase):
             runner = json.loads((run_dir / "review-run" / "review-run.json").read_text(encoding="utf-8"))
             self.assertEqual(runner["agent"], "manual")
             self.assertEqual(runner["mode"], "drift")
-            self.assertEqual(runner["status"], "not-run")
+            self.assertEqual(runner["status"], "pass-with-caveats")
             self.assertTrue((run_dir / "review-run" / "personas" / "doc-code-delta" / "prompt.md").exists())
             self.assertTrue((run_dir / "review-run" / "personas" / "ai-code-slop" / "findings.json").exists())
             synthesis = json.loads(
                 (run_dir / "review-run" / "synthesis" / "review-synthesis.json").read_text(encoding="utf-8")
             )
             self.assertEqual(synthesis["disposition"]["overall_status"], "not-run")
+            receipt = json.loads((run_dir / "review-run" / "receipt.json").read_text(encoding="utf-8"))
+            self.assertEqual(receipt["run"]["status"], "pass-with-caveats")
+            verify = run(["make", "agent-receipt-verify"], repo)
+            self.assertEqual(verify.returncode, 0, verify.stdout + verify.stderr)
 
             status = run(["git", "status", "--short"], repo)
             self.assertEqual(status.stdout.strip(), "")

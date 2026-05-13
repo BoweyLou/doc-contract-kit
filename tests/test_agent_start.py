@@ -144,6 +144,22 @@ class AgentStartTests(unittest.TestCase):
             self.assertEqual(packet["prompt_paths"], [".codex/prompts/tdd/README.md"])
             self.assertEqual(receipt["run"]["mode"], "test-first")
 
+    def test_repeated_agent_start_in_same_second_uses_unique_run_dirs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            init_repo(repo)
+            install(repo, "agentic")
+            commit_all(repo)
+
+            first = run(["make", "agent-start"], repo)
+            second = run(["make", "agent-start"], repo)
+
+            self.assertEqual(first.returncode, 0, first.stderr)
+            self.assertEqual(second.returncode, 0, second.stderr)
+            runs = sorted(path for path in (repo / ".agent-workflows" / "runs").iterdir() if path.is_dir())
+            self.assertGreaterEqual(len(runs), 2)
+            self.assertNotEqual(runs[-2].name, runs[-1].name)
+
     def test_no_adr_fallback_warns_but_succeeds(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)

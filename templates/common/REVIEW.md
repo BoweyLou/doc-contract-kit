@@ -14,6 +14,10 @@ hosted CI, or a specific coding agent is available.
   likely docs before asking an agent to reason broadly.
 - Use `scripts/lint_agent_docs.py --strict-paths` before trusting local agent
   instructions.
+- Use `.agent-workflows/agent-permission-policy.json` to select an explicit
+  trust profile before running read-only reviewers or write-capable workers.
+- Use `scripts/verify_agent_receipt.py --strict` before treating a JSON receipt
+  as complete evidence.
 
 ## Tool-Agnostic Agent Use
 
@@ -36,6 +40,10 @@ with:
 - TDD red/green evidence when behavior changed
 - findings with priority, confidence, evidence, recommendation, and disposition
 - skipped checks and reasons
+
+Strict receipt validation should fail when required evidence is missing or
+malformed. When red/green test evidence is not practical, record the explicit
+skip reason rather than leaving the receipt blank.
 
 ## Review Quality Bar
 

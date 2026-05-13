@@ -23,6 +23,7 @@ To generate a concrete review run folder from that packet:
 
 ```bash
 make agent-run-review AGENT=manual
+make agent-run-review AGENT=manual AGENT_TRUST_PROFILE=untrusted-pr
 ```
 
 Manual mode writes one prompt per selected persona plus placeholder JSON
@@ -40,6 +41,11 @@ make agent-run-review AGENT=amp
 The Amp adapter uses `amp --execute --stream-json`, saves raw JSONL output,
 extracts structured findings, runs synthesis, and checks that git status did
 not change during each read-only reviewer run.
+
+Review runs load `.agent-workflows/agent-permission-policy.json`. The default
+profile is `read-only-review`; use `AGENT_TRUST_PROFILE=untrusted-pr` for
+fork-origin or otherwise untrusted changes so the run is artifact-only and has
+no PR mutation, account mutation, secret, or write-back expectation.
 
 For manual startup, use:
 
@@ -60,6 +66,9 @@ For ongoing work after the first bootstrap review, change `bootstrap mode` to
 - `REVIEW.md`: local review rules and evidence bar.
 - `.agent-workflows/repo-review.md`: focused local repo-review workflow.
 - `.agent-workflows/tdd-red-green-receipt.md`: TDD evidence format.
+- `.agent-workflows/agent-permission-policy.json`: explicit local trust
+  profiles for read-only reviewers, untrusted PRs, browser research, and scoped
+  write workers.
 - `.agent-workflows/schemas/session-receipt.schema.json`: JSON receipt schema.
 - `.agent-workflows/schemas/safe-output.schema.json`: safe agent output schema.
 - `schemas/review-synthesis.schema.json`: JSON schema for synthesized review
@@ -78,6 +87,7 @@ make docs-check
 make agent-docs-lint
 make agent-docs-localize
 make agent-task-packet
+make agent-receipt-verify
 make version-check
 ```
 
@@ -87,6 +97,7 @@ If your repo does not use `make`, run the scripts directly:
 python3 scripts/check_doc_impact.py --working-tree
 python3 scripts/agent_start.py --mode bootstrap
 python3 scripts/agent_review_run.py --mode bootstrap --agent manual
+python3 scripts/verify_agent_receipt.py --strict
 python3 scripts/kit_status.py
 python3 scripts/lint_agent_docs.py --strict-paths
 python3 scripts/localize_doc_impact.py --working-tree --json

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "name": "agent-workflow-kit",
+  "version": "0.2.0-beta.3",
+  "source_url": "https://github.com/BoweyLou/agent-workflow-kit",
+  "source_ref": "2b25798ddbfb6e9c4e3b0953f114b3327023e5db",
+  "source_prompt_root": "workflows/prompts",
+  "generated_adapter": ".codex/prompts",
+  "snapshot_sha256": "7768a301879cbffd2ee21e7776caa4f9f7481e0798e7e03fc9b3e5942e836f5c",
+  "vendored_at": "2026-05-14",
+  "snapshot_paths": [
+    "templates/profiles/review-prompts/files/.codex/prompts",
+    "templates/profiles/test-first/files/.codex/prompts",
+    "templates/profiles/local-agentic/files/.agent-workflows",
+    "templates/common/persona-manifest.schema.json",
+    "templates/common/review-synthesis.schema.json",
+    "templates/common/session-receipt.schema.json",
+    "templates/common/task-packet.schema.json"
+  ],
+  "notes": "Records the upstream prompt/schema snapshot generated from agent-workflow-kit workflows/prompts and vendored into repo-contract-kit target-repo adapters."
+}

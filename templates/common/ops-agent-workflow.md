@@ -15,6 +15,7 @@ make docs-check
 make agent-docs-lint
 make agent-docs-localize
 make agent-task-packet
+make agent-receipt-verify
 make agent-verify
 make version-check
 ```
@@ -30,7 +31,10 @@ and a receipt template. Discovery check failures are recorded as warnings so
 inherited or messy repos can still be reviewed.
 
 `make kit-status` shows the installed kit version, source ref, selected profiles,
-manifest status, and target repo version.
+vendored `agent-workflow-kit` prompt snapshot ref/hash, manifest status,
+managed-file cleanliness, and target repo version. When a local kit checkout is
+available, run `make kit-status KIT=/path/to/repo-contract-kit` for an explicit
+`current`/`available` update signal.
 
 `make kit-update KIT=/path/to/repo-contract-kit` updates local kit-managed files
 from a newer local checkout. Clean managed files are replaced. Customized managed
@@ -42,6 +46,15 @@ a backlog row, issue, accepted review finding, external planning item, or broad
 human request needs to become scoped executable work before implementation
 starts.
 
+`make agent-receipt-verify` validates the latest local review receipt in strict
+mode. Set `RECEIPT=path/to/receipt.json` to validate a specific run. Strict mode
+requires completed local evidence rather than a shape-only receipt.
+
+`.agent-workflows/agent-permission-policy.json` defines local trust profiles
+such as `read-only-review`, `untrusted-pr`, `browser-research`, and
+`write-worker`. Read-only review runners use this policy to keep file, git,
+browser, network, MCP, and CI permissions explicit.
+
 `make version-check` validates the target repo `VERSION` file when the
 versioning profile is installed. Use `make version-bump BUMP=patch|minor|major`
 only when the accepted change needs a target repo version bump.
@@ -52,12 +65,17 @@ only when the accepted change needs a target repo version bump.
 - `REVIEW.md` defines the review contract.
 - `.agent-workflows/` contains tool-agnostic workflow guidance and receipt
   schemas.
+- `.agent-workflows/agent-permission-policy.json` contains local trust profiles
+  for review, untrusted PRs, browser research, and scoped write workers.
 - `.codex/prompts/` contains reusable prompts. The files can be read by other
   agents or used manually; they are not limited to Codex.
 - `schemas/task-packet.schema.json` defines the machine-readable handoff from
   backlog item to agent task.
 - `.github/workflows/docs.yml` is an optional hosted adapter for repos that can
   use GitHub Actions. Local verification does not depend on it.
+- `.github/workflows/agent-review-readonly.yml` is an optional hosted adapter
+  for fork-safe read-only review artifact generation. It uses
+  `AGENT_TRUST_PROFILE=untrusted-pr` and does not grant write credentials.
 - `.doc-contract-kit/manifest.json` records managed files and hashes for safe
   local updates.
 - `VERSION`, `CHANGELOG.md`, and `docs/versioning.md` define local target repo

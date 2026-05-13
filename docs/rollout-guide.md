@@ -12,8 +12,9 @@ If this is all new to you, adopt it in layers.
 3. Start running `make docs-check` locally.
 4. Add `--preset learning` when you want review and learning prompts in the repo.
 5. Add `--preset test-first` or `--preset agentic` when you want executable-spec prompts and local agent workflows.
-6. Run `make kit-status` and `make version-check` so the repo has an update
-   baseline and target SemVer baseline.
+6. Run `make kit-status`, optionally
+   `make kit-status KIT=/path/to/repo-contract-kit`, and `make version-check`
+   so the repo has an update, prompt-snapshot, and target SemVer baseline.
 7. Add hooks if you want faster local feedback.
 8. Add CI adapters only if your host supports them. The core workflow must still run locally.
 9. Later, add generated docs and executable doc tests.
@@ -24,6 +25,7 @@ After install, use these target-repo commands:
 
 - `make agent-start`
 - `make kit-status`
+- `make kit-status KIT=/path/to/repo-contract-kit`
 - `make kit-update KIT=/path/to/repo-contract-kit`
 - `make docs-check`
 - `make agent-docs-lint`
@@ -56,8 +58,13 @@ external planning item, or broad request needs to become one executable unit of
 work before an agent edits files.
 
 Use `make kit-status` when returning to a repo after some time. It shows the
-installed kit version, source ref, selected profiles, target repo version, and
-whether the managed manifest exists.
+installed kit version, source ref, selected profiles, vendored
+`agent-workflow-kit` prompt snapshot ref/hash, target repo version, whether the
+managed manifest exists, and whether managed files are clean.
+
+Use `make kit-status KIT=/path/to/repo-contract-kit` when you have a local kit
+checkout and want an explicit `current`/`available` update signal for both the
+install kit and the prompt snapshot.
 
 Use `make kit-update KIT=/path/to/repo-contract-kit` to update from a local kit
 checkout. Clean managed files are updated automatically. Customized files are

@@ -42,6 +42,8 @@ def manifest_payload(files: list[dict], profiles: list[str], preset: str | None)
         "kit_version": install.read_kit_version(),
         "source_version": install.read_kit_version(),
         "source_ref": install.current_source_ref(),
+        "source_components": install.source_components(),
+        "prompt_snapshot": install.prompt_snapshot_metadata(),
         "generated_at": generated_at,
         "preset": preset,
         "profiles": profiles,
@@ -110,13 +112,18 @@ def adopt_legacy(target: Path, entries: list[dict], profiles: list[str], preset:
             "kit_version": install.read_kit_version(),
             "source_version": install.read_kit_version(),
             "source_ref": install.current_source_ref(),
+            "source_components": install.source_components(),
+            "prompt_snapshot": install.prompt_snapshot_metadata(),
             "last_updated_at": now(),
             "preset": preset,
             "profiles": profiles,
         }
     )
     receipt.setdefault("installed_at", now())
-    receipt["source_commits"] = {"repo-contract-kit": install.current_source_ref()}
+    receipt["source_commits"] = {
+        "repo-contract-kit": install.current_source_ref(),
+        "agent-workflow-kit": install.prompt_snapshot_metadata().get("source_ref"),
+    }
     write_json(target / ".doc-contract-kit" / "install.json", receipt)
     print("Legacy install adopted. No managed files were overwritten. Re-run update to apply safe updates.")
 
@@ -136,10 +143,15 @@ def update_receipt(target: Path, profiles: list[str], preset: str | None):
             "kit_version": install.read_kit_version(),
             "source_version": install.read_kit_version(),
             "source_ref": install.current_source_ref(),
+            "source_components": install.source_components(),
+            "prompt_snapshot": install.prompt_snapshot_metadata(),
             "last_updated_at": now(),
             "preset": preset,
             "profiles": profiles,
-            "source_commits": {"repo-contract-kit": install.current_source_ref()},
+            "source_commits": {
+                "repo-contract-kit": install.current_source_ref(),
+                "agent-workflow-kit": install.prompt_snapshot_metadata().get("source_ref"),
+            },
         }
     )
     receipt.setdefault("installed_at", now())

@@ -83,6 +83,13 @@ class UpdateTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertNotEqual((repo / "AGENTS.md").read_text(encoding="utf-8"), "# Old managed agents\n")
             self.assertIn("# AGENTS.md", (repo / "AGENTS.md").read_text(encoding="utf-8"))
+            manifest = read_manifest(repo)
+            receipt = json.loads((repo / ".doc-contract-kit" / "install.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["prompt_snapshot"]["name"], "agent-workflow-kit")
+            self.assertEqual(
+                manifest["prompt_snapshot"]["snapshot_sha256"],
+                receipt["prompt_snapshot"]["snapshot_sha256"],
+            )
 
     def test_customized_file_preserves_target_and_writes_conflict_report(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -132,6 +139,9 @@ class UpdateTests(unittest.TestCase):
             self.assertIn("Legacy install adopted", result.stdout)
             self.assertEqual((repo / "AGENTS.md").read_text(encoding="utf-8"), customized)
             manifest = read_manifest(repo)
+            receipt = json.loads((repo / ".doc-contract-kit" / "install.json").read_text(encoding="utf-8"))
+            self.assertIn("agent-workflow-kit", receipt["source_components"])
+            self.assertEqual(manifest["prompt_snapshot"]["name"], "agent-workflow-kit")
             agents = next(item for item in manifest["files"] if item["path"] == "AGENTS.md")
             self.assertTrue(agents["managed"])
             self.assertEqual(agents["installed_sha256"], sha256_text(customized))

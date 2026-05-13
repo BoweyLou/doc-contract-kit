@@ -3,8 +3,9 @@ BUMP ?= patch
 KIT ?=
 AGENT ?= manual
 AMP ?= amp
+RECEIPT ?=
 
-.PHONY: docs-lint docs-build docs-generate docs-check agent-start agent-run-review agent-docs-lint agent-docs-localize agent-review agent-learn agent-task-packet agent-test-first agent-verify kit-status kit-update version-status version-check version-bump
+.PHONY: docs-lint docs-build docs-generate docs-check agent-start agent-run-review agent-receipt-verify agent-docs-lint agent-docs-localize agent-review agent-learn agent-task-packet agent-test-first agent-verify kit-status kit-update version-status version-check version-bump
 
 docs-lint:
 	@echo "Running basic docs lint checks..."
@@ -29,8 +30,19 @@ agent-start:
 agent-run-review:
 	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_review_run.py --mode "$(MODE)" --agent "$(AGENT)" --amp-command "$(AMP)"
 
+agent-receipt-verify:
+	@if test -n "$(RECEIPT)"; then \
+		PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify_agent_receipt.py --strict --receipt "$(RECEIPT)"; \
+	else \
+		PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify_agent_receipt.py --strict; \
+	fi
+
 kit-status:
-	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/kit_status.py
+	@if test -n "$(KIT)"; then \
+		PYTHONDONTWRITEBYTECODE=1 python3 scripts/kit_status.py --kit "$(KIT)"; \
+	else \
+		PYTHONDONTWRITEBYTECODE=1 python3 scripts/kit_status.py; \
+	fi
 
 kit-update:
 	@test -n "$(KIT)" || (echo "Set KIT=/path/to/repo-contract-kit"; exit 1)

@@ -17,15 +17,21 @@ agents can reason about behavior changes, changelog entries, and release impact.
 Use safe managed updates and local SemVer by default.
 
 The kit publishes its own version in root `VERSION` and records that version,
-the source ref, the selected preset, profiles, and managed file hashes in each
-target repository under `.doc-contract-kit/`. Installs keep
+the source ref, the vendored `agent-workflow-kit` prompt snapshot ref/hash, the
+selected preset, profiles, and managed file hashes in each target repository
+under `.doc-contract-kit/`. Installs keep
 `.doc-contract-kit/install.json` for compatibility and add
 `.doc-contract-kit/manifest.json` as the managed-file source of truth.
 
 Target repositories get local update entrypoints:
 
 - `make kit-status`
+- `make kit-status KIT=/path/to/repo-contract-kit`
 - `make kit-update KIT=/path/to/repo-contract-kit`
+
+When `KIT` is supplied, `kit-status` compares the installed kit and prompt
+snapshot against the local checkout and reports whether an update is current or
+available.
 
 Updates only overwrite a managed file when the current target file still matches
 the last installed hash. If a file was customized, the updater preserves it and
@@ -41,8 +47,8 @@ such as `v0.3.0` when a repository can use tags, but tags are not mandatory.
 ## Consequences
 
 The default workflow remains local-only and host-agnostic. Agents can inspect
-kit version, target repo version, and pending update state without relying on
-hosted CI/CD or GitHub APIs.
+kit version, prompt snapshot identity, target repo version, and pending update
+state without relying on hosted CI/CD or GitHub APIs.
 
 The updater is intentionally conservative. Customized files require human or
 agent review before adopting proposed replacements, which may make updates a

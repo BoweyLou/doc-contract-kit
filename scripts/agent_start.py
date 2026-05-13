@@ -236,6 +236,7 @@ def kit_context(root):
             "installed_version": None,
             "source_version": None,
             "source_ref": None,
+            "prompt_snapshot": None,
             "preset": None,
             "profiles": [],
             "last_updated_at": None,
@@ -247,11 +248,13 @@ def kit_context(root):
         }
 
     files = manifest.get("files", []) if isinstance(manifest, dict) else []
+    prompt_snapshot = receipt.get("prompt_snapshot") or (manifest.get("prompt_snapshot") if isinstance(manifest, dict) else None)
     return {
         "status": "managed" if isinstance(manifest, dict) else "legacy-no-manifest",
         "installed_version": receipt.get("kit_version"),
         "source_version": receipt.get("source_version") or receipt.get("kit_version"),
         "source_ref": receipt.get("source_ref") or receipt.get("source_commits", {}).get("repo-contract-kit"),
+        "prompt_snapshot": prompt_snapshot if isinstance(prompt_snapshot, dict) else None,
         "preset": receipt.get("preset"),
         "profiles": receipt.get("profiles", []),
         "last_updated_at": receipt.get("last_updated_at") or receipt.get("installed_at"),
@@ -461,6 +464,18 @@ def build_receipt_template(run_id, started_at, mode, repo, changed_files):
     }
 
 
+def allocate_run_dir(runs_root, run_id):
+    for index in range(100):
+        candidate_id = run_id if index == 0 else f"{run_id}-{index + 1}"
+        output_dir = runs_root / candidate_id
+        try:
+            output_dir.mkdir(parents=True, exist_ok=False)
+            return candidate_id, output_dir
+        except FileExistsError:
+            continue
+    raise SystemExit(f"Unable to allocate unique agent-start run directory for {run_id}")
+
+
 def format_check_lines(checks):
     lines = []
     for check in checks:
@@ -522,6 +537,7 @@ Treat latest ADRs as constraints/defaults; use the requested mode/backlog item a
 - Changed files: {len(packet['git']['changed_files'])}
 - Dirty working tree: {str(packet['git']['dirty']).lower()}
 - Kit status: {kit['status']} (version `{kit['source_version'] or 'unknown'}`)
+- Prompt snapshot: `{(kit['prompt_snapshot'] or {}).get('name', 'agent-workflow-kit')}` ref `{(kit['prompt_snapshot'] or {}).get('source_ref', 'unknown')}`
 - Target repo version: `{versioning['target_version']['current'] or 'missing'}`
 
 ## Kit And Versioning
@@ -590,8 +606,7 @@ def main():
     runs_root = (root / args.output_root).resolve()
     try:
         ensure_runs_gitignore(runs_root)
-        output_dir = runs_root / run_id
-        output_dir.mkdir(parents=True, exist_ok=False)
+        run_id, output_dir = allocate_run_dir(runs_root, run_id)
     except OSError as exc:
         raise SystemExit(f"Unable to create agent-start output directory: {exc}") from exc
 

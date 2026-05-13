@@ -16,9 +16,12 @@ tests, receipts, and tool-agnostic workflows.
 - a simple installer for bootstrapping target repositories
 - local-first agent workflow files that work without GitHub Actions or hosted CI
 - agent instruction linting for local prompt/rule files
+- explicit permission policies for read-only review, untrusted PRs, browser
+  research, and scoped write workers
 - evidence receipt and safe-output schemas
 - TDD/executable-spec workflow profiles
 - safe local kit updates with managed-file conflict reports
+- prompt snapshot provenance for vendored `agent-workflow-kit` files
 - default local SemVer files and version commands for agentic target repos
 - beginner-friendly docs explaining PRs, CI, hooks, ADRs, and agent instructions
 - a Hermes skill stub for later automation
@@ -33,6 +36,9 @@ This repository is the install layer:
 - profile installation, managed manifests, and update receipts
 - local agent workflow files under `.agent-workflows/`
 - tool-agnostic schemas and safe-output boundaries
+- installed provenance for both `repo-contract-kit` and the vendored
+  `agent-workflow-kit` prompt snapshot
+- optional fork-safe read-only PR workflow adapter
 
 The companion workflow layer is
 [agent-workflow-kit](https://github.com/BoweyLou/agent-workflow-kit). That repo
@@ -99,6 +105,8 @@ make agent-docs-lint
 make agent-docs-localize
 make agent-review
 make agent-run-review AGENT=manual
+make agent-run-review AGENT=manual AGENT_TRUST_PROFILE=untrusted-pr
+make agent-receipt-verify
 make agent-task-packet
 make agent-test-first
 make version-check
@@ -155,6 +163,21 @@ The Amp adapter calls `amp --execute --stream-json`, saves raw output, extracts
 JSON findings, runs synthesis, and fails the run if git status changes during a
 read-only reviewer or synthesis call.
 
+Review runs use `.agent-workflows/agent-permission-policy.json`; the default is
+`read-only-review`, and `AGENT_TRUST_PROFILE=untrusted-pr` keeps fork-origin or
+otherwise untrusted changes artifact-only with no write-back, PR mutation,
+browser account mutation, or secret access.
+
+Validate completed run evidence with:
+
+```bash
+make agent-receipt-verify
+make agent-receipt-verify RECEIPT=.agent-workflows/runs/<run-id>/review-run/receipt.json
+```
+
+Strict receipt validation fails when required local evidence is missing or
+malformed.
+
 The installer copies a vendored snapshot of the prompt library into the target
 repo under `.codex/prompts/`. The companion
 [agent-workflow-kit](https://github.com/BoweyLou/agent-workflow-kit) repo is the
@@ -165,13 +188,22 @@ or fetch it at runtime.
 
 Installs write `.doc-contract-kit/install.json` and
 `.doc-contract-kit/manifest.json`. The manifest records the managed files,
-their source templates, hashes, installed kit version, and source ref.
+their source templates, hashes, installed kit version, source ref, and the
+vendored `agent-workflow-kit` prompt snapshot ref/hash.
 
 From the target repo, check what is installed:
 
 ```bash
 make kit-status
 ```
+
+To compare the installed target against a local kit checkout:
+
+```bash
+make kit-status KIT=/path/to/repo-contract-kit
+```
+
+That prints whether the install kit or prompt snapshot has an update available.
 
 To update from a local kit checkout:
 
@@ -252,12 +284,14 @@ The kit currently installs:
 - `docs/adr/0000-template.md`
 - `.github/pull_request_template.md`
 - `.github/workflows/docs.yml`
+- `.github/workflows/agent-review-readonly.yml`
 - `.pre-commit-config.yaml`
 - `Makefile`
 - `scripts/check_doc_impact.py`
 - `scripts/agent_start.py`
 - `scripts/kit_status.py`
 - `scripts/lint_agent_docs.py`
+- `scripts/verify_agent_receipt.py`
 - `scripts/localize_doc_impact.py`
 - `scripts/version.py`
 - `schemas/task-packet.schema.json`
@@ -330,8 +364,12 @@ Installed target repos get Makefile entrypoints:
 - `make agent-start`: write an ignored local session packet with an agent
   brief, startup context, latest ADR context, kit/version context, recommended
   prompts/personas, and a receipt template.
-- `make kit-status`: show installed kit version, source ref, profiles, managed
-  manifest status, and target repo version.
+- `make kit-status`: show installed kit version, source ref, prompt snapshot
+  ref/hash, profiles, managed manifest status, managed-file cleanliness, and
+  target repo version.
+- `make kit-status KIT=/path/to/repo-contract-kit`: compare installed
+  provenance against a local kit checkout and report whether an update is
+  available.
 - `make kit-update KIT=/path/to/repo-contract-kit`: safely update managed files
   from a newer local kit checkout.
 - `make docs-check`: run the documentation contract checks.

@@ -6,12 +6,14 @@ import hashlib
 import json
 import shutil
 import subprocess
+import stat
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES = ROOT / "templates" / "common"
 PROFILES = ROOT / "templates" / "profiles"
 VERSION_FILE = ROOT / "VERSION"
+PROMPT_SNAPSHOT_FILE = ROOT / "agent-workflow-kit.snapshot.json"
 DEFAULT_PROFILE = "minimal"
 PRESETS = {
     "minimal": ["minimal"],
@@ -29,12 +31,15 @@ FILE_MAP = {
     "adr-template.md": "docs/adr/0000-template.md",
     "pull_request_template.md": ".github/pull_request_template.md",
     "docs-workflow.yml": ".github/workflows/docs.yml",
+    "agent-review-readonly.yml": ".github/workflows/agent-review-readonly.yml",
     "pre-commit-config.yaml": ".pre-commit-config.yaml",
     "Makefile": "Makefile",
     "session-receipt.schema.json": "schemas/session-receipt.schema.json",
     "review-synthesis.schema.json": "schemas/review-synthesis.schema.json",
     "task-packet.schema.json": "schemas/task-packet.schema.json",
     "persona-manifest.schema.json": "schemas/persona-manifest.schema.json",
+    "agent-permission-policy.schema.json": "schemas/agent-permission-policy.schema.json",
+    "agent-permission-policy.json": ".agent-workflows/agent-permission-policy.json",
     "safe-output.schema.json": ".agent-workflows/schemas/safe-output.schema.json",
     "agent-runs.gitignore": ".agent-workflows/runs/.gitignore",
     "updates.gitignore": ".doc-contract-kit/updates/.gitignore",
@@ -47,6 +52,7 @@ CORE_SCRIPTS = [
     "kit_status.py",
     "lint_agent_docs.py",
     "localize_doc_impact.py",
+    "verify_agent_receipt.py",
     "version.py",
 ]
 
@@ -54,6 +60,16 @@ TARGET_OWNED_PATHS = {
     "VERSION",
     "CHANGELOG.md",
 }
+
+PROMPT_SNAPSHOT_PATHS = [
+    "templates/profiles/review-prompts/files/.codex/prompts",
+    "templates/profiles/test-first/files/.codex/prompts",
+    "templates/profiles/local-agentic/files/.agent-workflows",
+    "templates/common/persona-manifest.schema.json",
+    "templates/common/review-synthesis.schema.json",
+    "templates/common/session-receipt.schema.json",
+    "templates/common/task-packet.schema.json",
+]
 
 
 def ensure_git_repo(target: Path):
@@ -70,11 +86,45 @@ def read_kit_version():
 
 
 def sha256_path(path: Path):
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+    return hashlib.sha256(source_bytes(path)).hexdigest()
+
+
+def read_json_file(path: Path):
+    try:
+        return json.loads(source_bytes(path).decode("utf-8"))
+    except FileNotFoundError:
+        return {}
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Invalid JSON in {path}: {exc}") from exc
+
+
+def prompt_snapshot_metadata():
+    metadata = read_json_file(PROMPT_SNAPSHOT_FILE)
+    paths = metadata.get("snapshot_paths") or PROMPT_SNAPSHOT_PATHS
+    snapshot = {
+        "name": metadata.get("name") or "agent-workflow-kit",
+        "version": metadata.get("version") or "unversioned",
+        "source_url": metadata.get("source_url") or "https://github.com/BoweyLou/agent-workflow-kit",
+        "source_ref": metadata.get("source_ref"),
+        "snapshot_sha256": metadata.get("snapshot_sha256"),
+        "snapshot_paths": paths,
+    }
+    for key in ("source_prompt_root", "generated_adapter", "vendored_at", "notes"):
+        if metadata.get(key):
+            snapshot[key] = metadata[key]
+    return snapshot
+
+
+def source_components():
+    kit_ref = current_source_ref()
+    prompt_snapshot = prompt_snapshot_metadata()
+    return {
+        "repo-contract-kit": {
+            "version": read_kit_version(),
+            "source_ref": kit_ref,
+        },
+        "agent-workflow-kit": prompt_snapshot,
+    }
 
 
 def relative_source(path: Path):
@@ -86,10 +136,44 @@ def relative_source(path: Path):
 
 def copy_path(src: Path, dst: Path):
     dst.parent.mkdir(parents=True, exist_ok=True)
-    with src.open("rb") as source, dst.open("wb") as target:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            target.write(chunk)
+    data = source_bytes(src)
+    dst.write_bytes(data)
     shutil.copymode(src, dst)
+
+
+def git_blob_bytes(src: Path):
+    try:
+        rel = src.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        return None
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(ROOT), "show", f"HEAD:{rel}"],
+            capture_output=True,
+            check=False,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if result.returncode != 0:
+        return None
+    return result.stdout
+
+
+def source_bytes(src: Path):
+    flags = getattr(src.stat(), "st_flags", 0)
+    # Some iCloud/FileProvider checkouts expose tracked vendored prompt files as
+    # hidden placeholders that can block on normal reads. Git blobs are the
+    # committed source of truth for those template snapshots.
+    placeholder_flags = stat.UF_HIDDEN | stat.UF_COMPRESSED | getattr(stat, "SF_DATALESS", 0)
+    if flags & placeholder_flags:
+        data = git_blob_bytes(src)
+        if data is not None:
+            return data
+        raise SystemExit(
+            f"Source template appears to be a macOS placeholder and could not be materialized: {src}"
+        )
+    return src.read_bytes()
 
 
 def copy_file(src: Path, dst: Path, force: bool):
@@ -108,11 +192,7 @@ def load_profile(name: str):
         available = ", ".join(sorted(path.name for path in PROFILES.iterdir() if path.is_dir()))
         raise SystemExit(f"Unknown profile: {name}. Available profiles: {available}")
 
-    try:
-        with manifest_path.open(encoding="utf-8") as f:
-            manifest = json.load(f)
-    except json.JSONDecodeError as exc:
-        raise SystemExit(f"Invalid profile manifest: {manifest_path}: {exc}") from exc
+    manifest = read_json_file(manifest_path)
 
     files = manifest.get("files", [])
     if not isinstance(files, list):
@@ -232,8 +312,9 @@ def current_git_commit():
             capture_output=True,
             text=True,
             check=False,
+            timeout=2,
         )
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         return None
 
     if result.returncode != 0:
@@ -281,6 +362,8 @@ def write_manifest(target: Path, entries: list[dict], written_targets: set[str],
         "kit_version": read_kit_version(),
         "source_version": read_kit_version(),
         "source_ref": current_source_ref(),
+        "source_components": source_components(),
+        "prompt_snapshot": prompt_snapshot_metadata(),
         "generated_at": generated_at,
         "preset": preset,
         "profiles": profiles,
@@ -299,12 +382,15 @@ def write_install_receipt(target: Path, profiles: list[str], preset: str | None)
         "kit_version": read_kit_version(),
         "source_version": read_kit_version(),
         "source_ref": current_source_ref(),
+        "source_components": source_components(),
+        "prompt_snapshot": prompt_snapshot_metadata(),
         "installed_at": timestamp,
         "last_updated_at": timestamp,
         "preset": preset,
         "profiles": profiles,
         "source_commits": {
             "repo-contract-kit": current_source_ref(),
+            "agent-workflow-kit": prompt_snapshot_metadata().get("source_ref"),
         },
     }
     receipt_path = target / ".doc-contract-kit" / "install.json"

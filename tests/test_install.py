@@ -56,9 +56,13 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((target / "scripts" / "version.py").exists())
             self.assertTrue((target / "scripts" / "lint_agent_docs.py").exists())
             self.assertTrue((target / "scripts" / "localize_doc_impact.py").exists())
+            self.assertTrue((target / "scripts" / "verify_agent_receipt.py").exists())
             self.assertTrue((target / "schemas" / "session-receipt.schema.json").exists())
             self.assertTrue((target / "schemas" / "persona-manifest.schema.json").exists())
+            self.assertTrue((target / "schemas" / "agent-permission-policy.schema.json").exists())
+            self.assertTrue((target / ".agent-workflows" / "agent-permission-policy.json").exists())
             self.assertTrue((target / ".agent-workflows" / "schemas" / "safe-output.schema.json").exists())
+            self.assertTrue((target / ".github" / "workflows" / "agent-review-readonly.yml").exists())
             self.assertTrue((target / ".agent-workflows" / "runs" / ".gitignore").exists())
             self.assertTrue((target / ".doc-contract-kit" / "manifest.json").exists())
             self.assertTrue((target / ".doc-contract-kit" / "updates" / ".gitignore").exists())
@@ -67,6 +71,9 @@ class InstallTests(unittest.TestCase):
             self.assertIn("source_version", receipt)
             self.assertIn("source_ref", receipt)
             self.assertIn("last_updated_at", receipt)
+            self.assertIn("prompt_snapshot", receipt)
+            self.assertEqual(receipt["prompt_snapshot"]["name"], "agent-workflow-kit")
+            self.assertIn("snapshot_sha256", receipt["prompt_snapshot"])
 
     def test_install_force_overwrites_existing_files(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -187,10 +194,14 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((target / "VERSION").exists())
             self.assertTrue((target / "CHANGELOG.md").exists())
             self.assertTrue((target / "docs" / "versioning.md").exists())
+            readonly_workflow = (target / ".github" / "workflows" / "agent-review-readonly.yml").read_text(encoding="utf-8")
+            self.assertIn("persist-credentials: false", readonly_workflow)
+            self.assertIn("AGENT_TRUST_PROFILE: untrusted-pr", readonly_workflow)
 
             makefile = (target / "Makefile").read_text(encoding="utf-8")
             self.assertIn("agent-start:", makefile)
             self.assertIn("agent-run-review:", makefile)
+            self.assertIn("agent-receipt-verify:", makefile)
             self.assertIn("kit-status:", makefile)
             self.assertIn("kit-update:", makefile)
             self.assertIn("agent-review:", makefile)
@@ -248,12 +259,27 @@ class InstallTests(unittest.TestCase):
                     self.assertTrue((latest / "review-run" / "review-run.json").exists())
                     self.assertTrue((latest / "review-run" / "synthesis" / "review-synthesis.json").exists())
 
+                if target_name == "kit-status":
+                    self.assertIn("agent-workflow-kit snapshot:", make_result.stdout)
+                    self.assertIn("managed file status: clean", make_result.stdout)
+
             receipt = json.loads((target / ".doc-contract-kit" / "install.json").read_text(encoding="utf-8"))
             self.assertEqual(receipt["preset"], "agentic")
             self.assertEqual(receipt["profiles"], ["minimal", "local-agentic", "review-prompts", "test-first", "versioning"])
             self.assertEqual(receipt["source_version"], (ROOT / "VERSION").read_text(encoding="utf-8").strip())
+            self.assertEqual(receipt["prompt_snapshot"]["source_ref"], "2b25798ddbfb6e9c4e3b0953f114b3327023e5db")
+            self.assertIn("agent-workflow-kit", receipt["source_components"])
+            self.assertEqual(
+                receipt["source_commits"]["agent-workflow-kit"],
+                "2b25798ddbfb6e9c4e3b0953f114b3327023e5db",
+            )
 
             manifest = json.loads((target / ".doc-contract-kit" / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["prompt_snapshot"]["name"], "agent-workflow-kit")
+            self.assertEqual(
+                manifest["prompt_snapshot"]["snapshot_sha256"],
+                receipt["prompt_snapshot"]["snapshot_sha256"],
+            )
             manifest_files = {item["path"]: item for item in manifest["files"]}
             self.assertTrue(manifest_files["AGENTS.md"]["managed"])
             self.assertFalse(manifest_files["VERSION"]["managed"])
@@ -346,6 +372,32 @@ class InstallTests(unittest.TestCase):
             )
             self.assertEqual(status.stdout.strip(), "")
 
+    def test_kit_status_compares_against_local_kit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "target"
+            target.mkdir()
+            init_real_git_repo(target)
+
+            result = subprocess.run(
+                [sys.executable, str(INSTALL), str(target), "--preset", "agentic"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            status = subprocess.run(
+                ["make", "kit-status", f"KIT={ROOT}"],
+                cwd=target,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(status.returncode, 0, status.stderr)
+            self.assertIn("kit update: current", status.stdout)
+            self.assertIn("prompt snapshot update: current", status.stdout)
+
     def test_lint_agent_docs_detects_hidden_unicode(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "target"
@@ -386,6 +438,60 @@ class InstallTests(unittest.TestCase):
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("referenced path does not exist: docs/missing.md", result.stdout)
+
+    def test_lint_agent_docs_detects_unsafe_commands_and_json_output(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "target"
+            target.mkdir()
+            (target / "AGENTS.md").write_text("Run `git reset --hard` if the agent gets stuck.\n", encoding="utf-8")
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "lint_agent_docs.py"),
+                    "--root",
+                    str(target),
+                    "--format",
+                    "json",
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "fail")
+            self.assertTrue(any(issue["rule_id"] == "git-reset-hard" for issue in payload["issues"]))
+
+    def test_lint_agent_docs_warns_on_contradictory_rules(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "target"
+            target.mkdir()
+            (target / "AGENTS.md").write_text(
+                "Do not commit from review mode.\nAgents may commit after review mode.\n",
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "lint_agent_docs.py"),
+                    "--root",
+                    str(target),
+                    "--format",
+                    "json",
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertTrue(any(issue["rule_id"] == "contradiction" for issue in payload["issues"]))
 
     def test_localize_doc_impact_outputs_json_categories(self):
         result = subprocess.run(

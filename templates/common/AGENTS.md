@@ -14,7 +14,8 @@ If asked to review, understand, clean up, or formalize this repo, start here:
 2. Run `make agent-start` to create a local startup packet under
    `.agent-workflows/runs/`.
 3. Inspect `make kit-status` and `make version-status` output when available so
-   you know the installed kit version and target repo version.
+   you know the installed kit version, vendored prompt snapshot, and target repo
+   version.
 4. Follow `.agent-workflows/repo-review.md` in the requested mode. Use
    `bootstrap` for the first review of an inherited or newly instrumented repo.
 5. Use the installed personas and prompts under `.codex/prompts/` where useful.
@@ -66,8 +67,11 @@ kit templates during updates.
 
 ## Kit updates
 
-Use `make kit-status` to inspect the installed kit version, source ref, profiles,
-manifest status, and target repo version. Use
+Use `make kit-status` to inspect the installed kit version, source ref, vendored
+`agent-workflow-kit` prompt snapshot, profiles, manifest status, managed-file
+cleanliness, and target repo version. Use
+`make kit-status KIT=/path/to/repo-contract-kit` when a local kit checkout is
+available and you need a `current`/`available` update signal. Use
 `make kit-update KIT=/path/to/repo-contract-kit` only when the user asks to
 refresh the local kit files. Customized managed files must be preserved; review
 proposed replacements under `.doc-contract-kit/updates/`.
