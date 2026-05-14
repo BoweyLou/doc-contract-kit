@@ -63,8 +63,10 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((target / "schemas" / "persona-manifest.schema.json").exists())
             self.assertTrue((target / "schemas" / "agent-permission-policy.schema.json").exists())
             self.assertTrue((target / ".agent-workflows" / "agent-permission-policy.json").exists())
+            self.assertTrue((target / ".agent-workflows" / "instruction-budgets.json").exists())
             self.assertTrue((target / ".agent-workflows" / "schemas" / "safe-output.schema.json").exists())
             self.assertTrue((target / ".github" / "workflows" / "agent-review-readonly.yml").exists())
+            self.assertTrue((target / "docs" / "ops" / "agent-instruction-hygiene.md").exists())
             self.assertTrue((target / "docs" / "ops" / "agent-tool-network-allowlist.md").exists())
             self.assertTrue((target / ".agent-workflows" / "runs" / ".gitignore").exists())
             self.assertTrue((target / ".doc-contract-kit" / "manifest.json").exists())
@@ -501,6 +503,79 @@ class InstallTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
             self.assertTrue(any(issue["rule_id"] == "contradiction" for issue in payload["issues"]))
+
+    def test_lint_agent_docs_warns_when_instruction_budget_is_exceeded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "target"
+            target.mkdir()
+            bullets = "\n".join(
+                f"- Agents must follow rule {index} because repeated local failures showed this is needed."
+                for index in range(1, 43)
+            )
+            (target / "AGENTS.md").write_text(f"# AGENTS.md\n\n{bullets}\n", encoding="utf-8")
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "lint_agent_docs.py"),
+                    "--root",
+                    str(target),
+                    "--format",
+                    "json",
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "pass")
+            self.assertTrue(any(issue["rule_id"] == "rule-budget" for issue in payload["issues"]))
+
+    def test_lint_agent_docs_budget_config_can_escalate_to_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "target"
+            target.mkdir()
+            (target / ".agent-workflows").mkdir()
+            (target / "AGENTS.md").write_text("# AGENTS.md\n\nMore detail than this repo allows.\n", encoding="utf-8")
+            (target / ".agent-workflows" / "instruction-budgets.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "budgets": [
+                            {
+                                "pattern": "AGENTS.md",
+                                "max_lines": 1,
+                                "max_rule_bullets": 10,
+                                "severity": "error",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "lint_agent_docs.py"),
+                    "--root",
+                    str(target),
+                    "--format",
+                    "json",
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "fail")
+            self.assertTrue(any(issue["rule_id"] == "instruction-budget" for issue in payload["issues"]))
 
     def test_localize_doc_impact_outputs_json_categories(self):
         result = subprocess.run(

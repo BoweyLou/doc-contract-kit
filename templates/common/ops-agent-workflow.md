@@ -23,6 +23,10 @@ make version-check
 `make agent-verify` is the default local gate. It runs the available
 documentation and agent-instruction checks for the installed profile.
 
+`make agent-docs-lint` also checks `.agent-workflows/instruction-budgets.json`
+so agent-facing instruction files stay small enough to route context instead of
+duplicating every rule in `AGENTS.md`.
+
 `make agent-start` is the lowest-friction session entrypoint. It writes an
 ignored packet under `.agent-workflows/runs/` containing the agent brief,
 machine-readable startup context, latest ADR context, discovery check results,
@@ -67,6 +71,8 @@ only when the accepted change needs a target repo version bump.
   schemas.
 - `.agent-workflows/agent-permission-policy.json` contains local trust profiles
   for review, untrusted PRs, browser research, and scoped write workers.
+- `.agent-workflows/instruction-budgets.json` contains warning-only size and
+  rule-count budgets for agent-facing instruction files.
 - `.codex/prompts/` contains reusable prompts. The files can be read by other
   agents or used manually; they are not limited to Codex.
 - `schemas/task-packet.schema.json` defines the machine-readable handoff from

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import fnmatch
 import json
 import re
 import sys
@@ -17,9 +18,12 @@ from pathlib import Path
 # - normalize_candidate/is_path_like/candidate_path_roots/discover_files choose lint targets.
 # - check_hidden_chars/line_has_placeholder/check_secrets_and_unsafe_guidance scan content risks.
 # - make_targets/command_lines/check_command_references validate commands.
+# - load_budget_config/check_instruction_budget detect context-stuffing risk.
 # - check_rule_bloat_and_provenance/check_contradictions detect maintainability problems.
 # - referenced_paths/check_referenced_paths validate mentioned files.
 # - check_file/issue_dict/sarif_payload/print_issues/parse_args/main run and report linting.
+
+DEFAULT_BUDGET_CONFIG = ".agent-workflows/instruction-budgets.json"
 
 DEFAULT_FILES = [
     "AGENTS.md",
@@ -77,6 +81,29 @@ GENERATED_OUTPUT_EXAMPLES = {
     "session-receipt.json",
 }
 
+DEFAULT_BUDGETS = [
+    {"pattern": "AGENTS.md", "max_lines": 160, "max_rule_bullets": 40, "severity": "warning"},
+    {"pattern": "REVIEW.md", "max_lines": 120, "max_rule_bullets": 32, "severity": "warning"},
+    {"pattern": "CLAUDE.md", "max_lines": 140, "max_rule_bullets": 36, "severity": "warning"},
+    {"pattern": "GEMINI.md", "max_lines": 140, "max_rule_bullets": 36, "severity": "warning"},
+    {
+        "pattern": ".github/copilot-instructions.md",
+        "max_lines": 120,
+        "max_rule_bullets": 32,
+        "severity": "warning",
+    },
+    {"pattern": ".cursor/rules/**", "max_lines": 120, "max_rule_bullets": 32, "severity": "warning"},
+    {"pattern": ".continue/rules/**", "max_lines": 120, "max_rule_bullets": 32, "severity": "warning"},
+    {"pattern": ".windsurf/rules/**", "max_lines": 120, "max_rule_bullets": 32, "severity": "warning"},
+    {
+        "pattern": ".agent-workflows/**/*.md",
+        "max_lines": 260,
+        "max_rule_bullets": 60,
+        "severity": "warning",
+    },
+    {"pattern": ".codex/prompts/**/*.md", "max_lines": 420, "max_rule_bullets": 80, "severity": "warning"},
+]
+
 
 @dataclass
 class Issue:
@@ -114,6 +141,7 @@ ACCOUNT_MUTATION_PATTERNS = [
 ]
 
 RULE_WORD_RE = re.compile(r"\b(must|always|never|required|require|should)\b", re.IGNORECASE)
+RULE_BULLET_RE = re.compile(r"^\s*(?:[-*]|\d+[.)])\s+")
 PROVENANCE_WORD_RE = re.compile(r"\b(because|when|if|unless|so that|to prevent|risk|failure|regression|evidence)\b", re.IGNORECASE)
 MAKE_TARGET_RE = re.compile(r"^([A-Za-z0-9_.-]+)\s*:(?![=])")
 COMMAND_BLOCK_RE = re.compile(r"```(?:bash|sh|shell|zsh|text)?\n(.*?)```", re.DOTALL)
@@ -197,6 +225,97 @@ def discover_files(root: Path, explicit_files: list[str]):
                     paths.append(path)
 
     return sorted({path.resolve() for path in paths})
+
+
+def load_budget_config(root: Path, config_file: str | None):
+    path = (root / config_file).resolve() if config_file else root / DEFAULT_BUDGET_CONFIG
+    if not path.exists():
+        return {"budgets": DEFAULT_BUDGETS}
+
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Invalid JSON config in {path}: {exc}") from exc
+
+    if not isinstance(payload, dict):
+        raise SystemExit(f"Invalid instruction budget config in {path}: top-level value must be an object")
+
+    budgets = payload.get("budgets", DEFAULT_BUDGETS)
+    if not isinstance(budgets, list):
+        raise SystemExit(f"Invalid instruction budget config in {path}: budgets must be a list")
+
+    normalized = []
+    for index, budget in enumerate(budgets, start=1):
+        if not isinstance(budget, dict):
+            raise SystemExit(f"Invalid instruction budget entry {index} in {path}: entry must be an object")
+        pattern = budget.get("pattern")
+        severity = budget.get("severity", "warning")
+        if not isinstance(pattern, str) or not pattern.strip():
+            raise SystemExit(f"Invalid instruction budget entry {index} in {path}: pattern is required")
+        if severity not in {"warning", "error"}:
+            raise SystemExit(f"Invalid instruction budget entry {index} in {path}: severity must be warning or error")
+        normalized.append(
+            {
+                "pattern": pattern,
+                "max_lines": budget.get("max_lines"),
+                "max_rule_bullets": budget.get("max_rule_bullets"),
+                "severity": severity,
+            }
+        )
+    return {"budgets": normalized}
+
+
+def matching_budget(root: Path, path: Path, budget_config: dict):
+    rel = path.relative_to(root).as_posix()
+    for budget in budget_config.get("budgets", []):
+        pattern = budget["pattern"]
+        if rel == pattern or fnmatch.fnmatch(rel, pattern):
+            return budget
+    return None
+
+
+def count_rule_bullets(lines: list[str]):
+    return sum(
+        1
+        for line in lines
+        if RULE_BULLET_RE.match(line.strip()) and RULE_WORD_RE.search(line)
+    )
+
+
+def check_instruction_budget(root: Path, path: Path, text: str, budget_config: dict):
+    budget = matching_budget(root, path, budget_config)
+    if not budget:
+        return []
+
+    issues = []
+    lines = text.splitlines()
+    line_count = len(lines)
+    rule_bullets = count_rule_bullets(lines)
+    severity = budget["severity"]
+
+    max_lines = budget.get("max_lines")
+    if isinstance(max_lines, int) and line_count > max_lines:
+        issues.append(
+            Issue(
+                severity,
+                path,
+                f"instruction file has {line_count} lines; budget is {max_lines}. Route detail to scoped docs, contracts, or checker output instead of expanding this file",
+                "instruction-budget",
+            )
+        )
+
+    max_rule_bullets = budget.get("max_rule_bullets")
+    if isinstance(max_rule_bullets, int) and rule_bullets > max_rule_bullets:
+        issues.append(
+            Issue(
+                severity,
+                path,
+                f"instruction file has {rule_bullets} rule-like bullets; budget is {max_rule_bullets}. Promote repeatable rules into contracts or scoped policy docs",
+                "rule-budget",
+            )
+        )
+
+    return issues
 
 
 def check_hidden_chars(path: Path, text: str):
@@ -364,7 +483,7 @@ def check_referenced_paths(root: Path, path: Path, text: str, strict_paths: bool
     return issues
 
 
-def check_file(root: Path, path: Path, strict_paths: bool):
+def check_file(root: Path, path: Path, strict_paths: bool, budget_config: dict):
     try:
         text = path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
@@ -376,6 +495,7 @@ def check_file(root: Path, path: Path, strict_paths: bool):
     issues.extend(check_command_references(root, path, text))
     issues.extend(check_secrets_and_unsafe_guidance(path, text))
     issues.extend(check_contradictions(path, text))
+    issues.extend(check_instruction_budget(root, path, text, budget_config))
     issues.extend(check_rule_bloat_and_provenance(path, text))
     return issues
 
@@ -466,6 +586,11 @@ def parse_args():
         help="Fail when path-like references do not exist. Without this flag, missing references are warnings.",
     )
     parser.add_argument(
+        "--budget-config",
+        default=DEFAULT_BUDGET_CONFIG,
+        help=f"Instruction budget config relative to root. Defaults to {DEFAULT_BUDGET_CONFIG}.",
+    )
+    parser.add_argument(
         "--format",
         choices=["text", "json", "sarif"],
         default="text",
@@ -478,6 +603,7 @@ def main():
     args = parse_args()
     root = Path(args.root).expanduser().resolve()
     files = discover_files(root, args.files)
+    budget_config = load_budget_config(root, args.budget_config)
 
     if not files:
         print("No agent instruction files found.")
@@ -485,7 +611,7 @@ def main():
 
     all_issues = []
     for path in files:
-        all_issues.extend(check_file(root, path, args.strict_paths))
+        all_issues.extend(check_file(root, path, args.strict_paths, budget_config))
 
     print_issues(all_issues, root, args.format, len(files))
 

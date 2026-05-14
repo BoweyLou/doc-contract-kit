@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.3 - 2026-05-14
+
+- Add installed instruction-budget config and linter checks so `AGENTS.md`,
+  `REVIEW.md`, and runtime-specific agent rules can stay concise as features
+  are added.
+- Add agent-instruction hygiene guidance that routes durable rules into scoped
+  contracts, checkers, runbooks, ADRs, or receipts instead of stuffing them into
+  root instruction files.
+
 ## 0.4.2 - 2026-05-14
 
 - Add review-risk and trust-profile context to `make agent-start` packets and

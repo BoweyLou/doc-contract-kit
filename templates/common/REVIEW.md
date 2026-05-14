@@ -14,6 +14,9 @@ hosted CI, or a specific coding agent is available.
   likely docs before asking an agent to reason broadly.
 - Use `scripts/lint_agent_docs.py --strict-paths` before trusting local agent
   instructions.
+- Treat `docs/ops/agent-instruction-hygiene.md` and
+  `.agent-workflows/instruction-budgets.json` as the guardrail against packing
+  too much context into `AGENTS.md` or runtime-specific rule files.
 - Use `.agent-workflows/agent-permission-policy.json` to select an explicit
   trust profile before running read-only reviewers or write-capable workers.
 - Use `docs/ops/agent-tool-network-allowlist.md` to confirm allowed shell,

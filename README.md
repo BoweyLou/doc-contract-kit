@@ -16,6 +16,7 @@ tests, receipts, and tool-agnostic workflows.
 - a simple installer for bootstrapping target repositories
 - local-first agent workflow files that work without GitHub Actions or hosted CI
 - agent instruction linting for local prompt/rule files
+- instruction budgets so `AGENTS.md` and tool-specific rule files stay concise
 - explicit permission policies for read-only review, untrusted PRs, browser
   research, and scoped write workers
 - review-risk and trust-profile startup context
@@ -285,6 +286,7 @@ The kit currently installs:
 - `REVIEW.md`
 - `docs/documentation-contract.md`
 - `docs/ops/agent-workflow.md`
+- `docs/ops/agent-instruction-hygiene.md`
 - `docs/adr/0000-template.md`
 - `.github/pull_request_template.md`
 - `.github/workflows/docs.yml`
@@ -299,6 +301,7 @@ The kit currently installs:
 - `scripts/localize_doc_impact.py`
 - `scripts/version.py`
 - `schemas/task-packet.schema.json`
+- `.agent-workflows/instruction-budgets.json`
 - `.agent-workflows/schemas/safe-output.schema.json`
 - `.agent-workflows/runs/.gitignore`
 - `.doc-contract-kit/install.json`
@@ -379,7 +382,8 @@ Installed target repos get Makefile entrypoints:
   from a newer local kit checkout.
 - `make docs-check`: run the documentation contract checks.
 - `make agent-docs-lint`: check local agent instruction files for hidden
-  Unicode, stale paths, and unsafe references.
+  Unicode, stale paths, unsafe references, contradictions, and instruction
+  budget drift.
 - `make agent-docs-localize`: emit JSON that maps changed files to likely
   documentation impact.
 - `make agent-review`: point the agent at the multi-agent repo review prompt.

@@ -19,13 +19,15 @@ If asked to review, understand, clean up, or formalize this repo, start here:
 4. Inspect `docs/ops/agent-tool-network-allowlist.md` and the selected trust
    profile in `.agent-workflows/agent-permission-policy.json` before running
    review agents, browser research, or CI adapters.
-5. Follow `.agent-workflows/repo-review.md` in the requested mode. Use
+5. Inspect `docs/ops/agent-instruction-hygiene.md` before adding new
+   agent-facing rules so `AGENTS.md` stays an index instead of a context dump.
+6. Follow `.agent-workflows/repo-review.md` in the requested mode. Use
    `bootstrap` for the first review of an inherited or newly instrumented repo.
-6. Use the installed personas and prompts under `.codex/prompts/` where useful.
-7. Run `make agent-verify` and `make agent-docs-localize` before proposing code
+7. Use the installed personas and prompts under `.codex/prompts/` where useful.
+8. Run `make agent-verify` and `make agent-docs-localize` before proposing code
    changes.
-8. Produce a findings backlog before editing code.
-9. If work starts from a backlog item, issue, accepted finding, or broad human
+9. Produce a findings backlog before editing code.
+10. If work starts from a backlog item, issue, accepted finding, or broad human
    request, run `make agent-task-packet` and convert one selected item into
    scoped executable work before implementation.
 
@@ -82,6 +84,13 @@ proposed replacements under `.doc-contract-kit/updates/`.
 Use the review-risk tier from `make agent-start` to choose the smallest safe
 reviewer set. High-risk or critical changes should stay read-only until a human
 accepts a scoped implementation task.
+
+## Instruction hygiene
+
+Keep `AGENTS.md` as a short route map. Put detailed rules in scoped contracts,
+runbooks, ADRs, or checker config. `make agent-docs-lint` reads
+`.agent-workflows/instruction-budgets.json` and warns when agent instruction
+files become too large or too rule-heavy.
 
 ## ADR rules
 
