@@ -15,6 +15,7 @@ make docs-check
 make agent-docs-lint
 make agent-docs-localize
 make agent-task-packet
+make agent-task-prepare TASK=<id> SCOPE=<paths>
 make agent-receipt-verify
 make agent-verify
 make version-check
@@ -50,6 +51,13 @@ a backlog row, issue, accepted review finding, external planning item, or broad
 human request needs to become scoped executable work before implementation
 starts.
 
+`make agent-task-prepare TASK=<id> SCOPE=<paths>` creates a write-capable task
+branch and sibling worktree, writes a task packet and receipt template under
+`.agent-workflows/tasks/` in that worktree, and records local in-flight metadata
+under `.agent-workflows/tasks/` in the main checkout. It refuses a dirty main
+checkout by default. Set `OVERLAP=block` to stop when declared scope overlaps
+another active task, or keep the default `OVERLAP=warn` while triaging.
+
 `make agent-receipt-verify` validates the latest local review receipt in strict
 mode. Set `RECEIPT=path/to/receipt.json` to validate a specific run. Strict mode
 requires completed local evidence rather than a shape-only receipt.
@@ -73,6 +81,8 @@ only when the accepted change needs a target repo version bump.
   for review, untrusted PRs, browser research, and scoped write workers.
 - `.agent-workflows/instruction-budgets.json` contains warning-only size and
   rule-count budgets for agent-facing instruction files.
+- `.agent-workflows/tasks/` contains ignored local in-flight task metadata for
+  worktree-per-task write workers.
 - `.codex/prompts/` contains reusable prompts. The files can be read by other
   agents or used manually; they are not limited to Codex.
 - `schemas/task-packet.schema.json` defines the machine-readable handoff from

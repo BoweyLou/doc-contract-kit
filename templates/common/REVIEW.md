@@ -23,6 +23,8 @@ hosted CI, or a specific coding agent is available.
   browser, network, MCP, Git, and CI surfaces before running agentic review.
 - Use the `review_risk` block from `make agent-start` to decide whether the
   default reviewer set is enough or specialist reviewers are required.
+- Use `make agent-task-prepare TASK=<id> SCOPE=<paths>` before write-capable
+  implementation work so the worker runs in a task branch and sibling worktree.
 - Use `scripts/verify_agent_receipt.py --strict` before treating a JSON receipt
   as complete evidence.
 

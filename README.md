@@ -110,6 +110,7 @@ make agent-run-review AGENT=manual
 make agent-run-review AGENT=manual AGENT_TRUST_PROFILE=untrusted-pr
 make agent-receipt-verify
 make agent-task-packet
+make agent-task-prepare TASK=<id> SCOPE=<paths>
 make agent-test-first
 make version-check
 ```
@@ -392,6 +393,9 @@ Installed target repos get Makefile entrypoints:
 - `make agent-learn`: point the agent at the learner-focused comment prompt.
 - `make agent-task-packet`: point the agent at the task-packet prompt for
   backlog items, issues, accepted findings, and broad human requests.
+- `make agent-task-prepare TASK=<id> SCOPE=<paths>`: create a
+  worktree-per-task branch, local task packet, receipt template, and in-flight
+  metadata for an approved write-capable task.
 - `make agent-test-first`: point the agent at the TDD/executable-spec prompt chooser.
 - `make agent-verify`: run the verification checks currently available in the installed profile.
 - `make version-status`: print the target repo version.

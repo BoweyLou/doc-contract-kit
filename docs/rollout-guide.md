@@ -34,6 +34,7 @@ After install, use these target-repo commands:
 - `make agent-run-review AGENT=manual`
 - `make agent-learn`
 - `make agent-task-packet`
+- `make agent-task-prepare TASK=<id> SCOPE=<paths>`
 - `make agent-test-first`
 - `make agent-verify`
 - `make version-status`
@@ -60,6 +61,11 @@ the read-only personas with `amp --execute --stream-json`.
 Use `make agent-task-packet` when a backlog row, issue, accepted finding,
 external planning item, or broad request needs to become one executable unit of
 work before an agent edits files.
+
+Use `make agent-task-prepare TASK=<id> SCOPE=<paths>` after the task packet is
+approved and before a write-capable worker edits files. It creates a
+`codex/task-...` branch in a sibling worktree, writes local task artifacts, and
+records in-flight metadata so overlapping task scopes can warn or block.
 
 Use `make kit-status` when returning to a repo after some time. It shows the
 installed kit version, source ref, selected profiles, vendored

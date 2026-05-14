@@ -50,6 +50,7 @@ class InstallTests(unittest.TestCase):
             self.assertEqual(agents.read_text(encoding="utf-8"), "existing agents\n")
             self.assertTrue((target / "doc-contract.json").exists())
             self.assertTrue((target / "scripts" / "agent_start.py").exists())
+            self.assertTrue((target / "scripts" / "agent_task_prepare.py").exists())
             self.assertTrue((target / "scripts" / "classify_review_risk.py").exists())
             self.assertTrue((target / "scripts" / "check_doc_impact.py").exists())
             self.assertTrue((target / "scripts" / "kit_status.py").exists())
@@ -69,6 +70,7 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((target / "docs" / "ops" / "agent-instruction-hygiene.md").exists())
             self.assertTrue((target / "docs" / "ops" / "agent-tool-network-allowlist.md").exists())
             self.assertTrue((target / ".agent-workflows" / "runs" / ".gitignore").exists())
+            self.assertTrue((target / ".agent-workflows" / "tasks" / ".gitignore").exists())
             self.assertTrue((target / ".doc-contract-kit" / "manifest.json").exists())
             self.assertTrue((target / ".doc-contract-kit" / "updates" / ".gitignore").exists())
 
@@ -208,6 +210,7 @@ class InstallTests(unittest.TestCase):
 
             makefile = (target / "Makefile").read_text(encoding="utf-8")
             self.assertIn("agent-start:", makefile)
+            self.assertIn("agent-task-prepare:", makefile)
             self.assertIn("agent-run-review:", makefile)
             self.assertIn("agent-receipt-verify:", makefile)
             self.assertIn("kit-status:", makefile)

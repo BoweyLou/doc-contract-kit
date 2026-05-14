@@ -4,8 +4,15 @@ KIT ?=
 AGENT ?= manual
 AMP ?= amp
 RECEIPT ?=
+TASK ?=
+TITLE ?=
+SCOPE ?=
+BASE_REF ?= HEAD
+WORKTREE_ROOT ?=
+OVERLAP ?= warn
+ALLOW_DIRTY ?= 0
 
-.PHONY: docs-lint docs-build docs-generate docs-check agent-start agent-run-review agent-receipt-verify agent-docs-lint agent-docs-localize agent-review agent-learn agent-review-risk agent-task-packet agent-test-first agent-verify kit-status kit-update version-status version-check version-bump
+.PHONY: docs-lint docs-build docs-generate docs-check agent-start agent-task-prepare agent-run-review agent-receipt-verify agent-docs-lint agent-docs-localize agent-review agent-learn agent-review-risk agent-task-packet agent-test-first agent-verify kit-status kit-update version-status version-check version-bump
 
 docs-lint:
 	@echo "Running basic docs lint checks..."
@@ -26,6 +33,18 @@ docs-check: docs-lint docs-build docs-generate
 
 agent-start:
 	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_start.py --mode "$(MODE)"
+
+agent-task-prepare:
+	@test -n "$(TASK)" || (echo "Set TASK=<id>"; exit 1)
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_task_prepare.py \
+		--task "$(TASK)" \
+		--title "$(TITLE)" \
+		--scope "$(SCOPE)" \
+		--mode "$(MODE)" \
+		--base-ref "$(BASE_REF)" \
+		--worktree-root "$(WORKTREE_ROOT)" \
+		--overlap-policy "$(OVERLAP)" \
+		$(if $(filter 1 true yes,$(ALLOW_DIRTY)),--allow-dirty,)
 
 agent-run-review:
 	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_review_run.py --mode "$(MODE)" --agent "$(AGENT)" --amp-command "$(AMP)"

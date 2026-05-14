@@ -30,6 +30,9 @@ If asked to review, understand, clean up, or formalize this repo, start here:
 10. If work starts from a backlog item, issue, accepted finding, or broad human
    request, run `make agent-task-packet` and convert one selected item into
    scoped executable work before implementation.
+11. For write-capable implementation, run
+    `make agent-task-prepare TASK=<id> SCOPE=<paths>` before editing so the
+    worker gets an isolated branch, worktree, task packet, and receipt template.
 
 The prompts under `.codex/prompts/` are local copies installed by
 `repo-contract-kit`. Do not fetch prompts from another repo during normal work
@@ -84,6 +87,11 @@ proposed replacements under `.doc-contract-kit/updates/`.
 Use the review-risk tier from `make agent-start` to choose the smallest safe
 reviewer set. High-risk or critical changes should stay read-only until a human
 accepts a scoped implementation task.
+
+Use `make agent-task-prepare TASK=<id>` for accepted write-capable tasks. It
+creates a sibling worktree under a task branch with the normal Codex branch
+prefix, records local in-flight metadata under `.agent-workflows/tasks/`, and
+warns when declared scope overlaps another active task.
 
 ## Instruction hygiene
 

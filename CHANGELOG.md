@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.4 - 2026-05-14
+
+- Add `make agent-task-prepare TASK=<id>` for approved write-capable tasks. The
+  command creates a task branch and sibling worktree, writes local task packet
+  and receipt artifacts, records in-flight metadata, and warns or blocks on
+  overlapping declared scopes.
+- Install ignored `.agent-workflows/tasks/` metadata storage and document the
+  worktree-per-task flow in target repo guidance.
+
 ## 0.4.3 - 2026-05-14
 
 - Add installed instruction-budget config and linter checks so `AGENTS.md`,

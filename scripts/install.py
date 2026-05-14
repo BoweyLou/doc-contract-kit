@@ -60,10 +60,12 @@ FILE_MAP = {
     "instruction-budgets.json": ".agent-workflows/instruction-budgets.json",
     "safe-output.schema.json": ".agent-workflows/schemas/safe-output.schema.json",
     "agent-runs.gitignore": ".agent-workflows/runs/.gitignore",
+    "agent-tasks.gitignore": ".agent-workflows/tasks/.gitignore",
     "updates.gitignore": ".doc-contract-kit/updates/.gitignore",
 }
 
 CORE_SCRIPTS = [
+    "agent_task_prepare.py",
     "agent_start.py",
     "agent_review_run.py",
     "classify_review_risk.py",
@@ -468,6 +470,7 @@ def main():
     print("  pre-commit install")
     if "review-prompts" in profiles:
         print("  run make agent-review, make agent-run-review, or make agent-learn when you want agent guidance")
+        print("  run make agent-task-prepare TASK=<id> SCOPE=<paths> before write-capable task work")
     if "test-first" in profiles:
         print("  review docs/testing-strategy.md and .codex/prompts/tdd/ before the next behavior change")
     if "local-agentic" in profiles:
