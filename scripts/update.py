@@ -12,6 +12,19 @@ if str(SCRIPT_DIR) not in sys.path:
 
 import install  # noqa: E402
 
+# Script flow:
+# 1. Read the existing install manifest and desired update profiles.
+# 2. Adopt older installs into the current managed-file manifest format when needed.
+# 3. Copy proposed kit files into the target repo's .doc-contract-kit update area.
+# 4. Write an update receipt and manifest so humans can review before applying.
+#
+# Function guide:
+# - read_json/write_json/now/run_id provide IO and timestamps.
+# - manifest_payload/source_metadata/write_manifest_payload describe the source kit.
+# - resolve_profiles/adoption_files/adopt_legacy decide what the target should manage.
+# - copy_proposed/update_receipt/write_update_report/merged_manifest_files assemble update artifacts.
+# - apply_update/main orchestrate the update command.
+
 
 def read_json(path: Path):
     try:

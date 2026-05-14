@@ -7,6 +7,17 @@ import subprocess
 from pathlib import Path
 
 
+# Script flow:
+# 1. Read local install manifests and source-kit metadata.
+# 2. Compare managed files against recorded hashes and current local files.
+# 3. Print installed version, source reference, prompt snapshot, and drift status.
+# 4. Highlight whether the target repo appears current or needs an update.
+#
+# Function guide:
+# - read_json/read_text/sha256_path load files and compute checksums.
+# - current_git_commit/current_git_commit_from_files/local_prompt_snapshot/local_kit_state inspect source and target state.
+# - short_ref/snapshot_from_install/managed_file_status format comparison data.
+# - print_update_comparison/main render the status report.
 def read_json(path: Path):
     try:
         return json.loads(path.read_text(encoding="utf-8"))

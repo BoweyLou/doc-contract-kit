@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1 - 2026-05-14
+
+- Add script-flow and function-guide comments across the repo-contract-kit
+  scripts so maintainers can trace each command's execution path and helper
+  roles.
+
 ## 0.4.0 - 2026-05-14
 
 - Add agent permission policy templates for read-only review, untrusted PRs,

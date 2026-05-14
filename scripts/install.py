@@ -9,6 +9,20 @@ import subprocess
 import stat
 from pathlib import Path
 
+# Script flow:
+# 1. Resolve the target git repo and requested install profiles.
+# 2. Expand profile entries into concrete template files and script assets.
+# 3. Copy or compare managed files, preserving metadata needed for updates.
+# 4. Write install manifests and receipts so future status/update checks know what changed.
+#
+# Function guide:
+# - ensure_git_repo/read_kit_version/sha256_path/read_json_file collect basic inputs.
+# - prompt_snapshot_metadata/source_components/relative_source describe source kit state.
+# - copy_path/git_blob_bytes/source_bytes/copy_file handle template copying and checksums.
+# - load_profile/resolve_profile_source/common_entries/core_script_entries/profile_entries build install entries.
+# - desired_entries/final_entries_by_target/split_profiles/unique_ordered/resolve_requested_profiles resolve requested profiles.
+# - current_git_commit/current_source_ref/manifest_file_entry/write_manifest/write_install_receipt/main perform install bookkeeping.
+
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES = ROOT / "templates" / "common"
 PROFILES = ROOT / "templates" / "profiles"

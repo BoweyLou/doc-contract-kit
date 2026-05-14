@@ -10,6 +10,17 @@ from pathlib import Path
 from typing import Any
 
 
+# Script flow:
+# 1. Locate an explicit receipt or the latest local review-run receipt.
+# 2. Validate the receipt's top-level fields, commands, findings, and evidence.
+# 3. Accumulate all errors so callers get one complete failure report.
+# 4. Exit cleanly only when the receipt is structurally usable.
+#
+# Function guide:
+# - load_json/latest_receipt read the receipt input.
+# - require/as_dict/as_list provide defensive validation helpers.
+# - validate_command/validate_finding validate nested receipt records.
+# - validate_receipt/parse_args/main run the full CLI check.
 VALID_RUN_STATUSES = {"pass", "pass-with-caveats", "fail", "blocked", "not-run"}
 VALID_COMMAND_RESULTS = {"pass", "fail", "not-run", "blocked"}
 VALID_TEST_RESULTS = {"red-green", "green-only", "not-applicable", "not-run", "blocked"}

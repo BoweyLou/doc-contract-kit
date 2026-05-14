@@ -9,6 +9,21 @@ from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 
+# Script flow:
+# 1. Load doc-contract.json and merge it with default documentation rules.
+# 2. Collect changed files from staged, working-tree, branch, or explicit input.
+# 3. Classify code/config changes and detect matching documentation updates.
+# 4. Report whether docs are covered, missing, ignored, or explicitly waived.
+#
+# Function guide:
+# - run/deep_merge/load_config/unique_paths provide shared utilities.
+# - diff_name_only/get_*_changed_files collect git changes.
+# - normalize_path/matches_pattern/matches_any/all_doc_patterns classify paths.
+# - file_exists/is_doc_file/is_ignored_file classify repo files.
+# - classify_changes/find_docs_changed/find_covered_categories build evaluation facts.
+# - has_no_docs_marker/has_no_docs_declaration detect explicit waivers.
+# - evaluate/parse_args/main produce the final result.
+
 CONFIG_FILE = "doc-contract.json"
 
 DEFAULT_CONFIG = {

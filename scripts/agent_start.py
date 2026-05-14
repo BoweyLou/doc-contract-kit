@@ -8,6 +8,21 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Script flow:
+# 1. Inspect the target repo, changed files, kit state, backlog, and docs context.
+# 2. Recommend review personas and checks that match the detected change set.
+# 3. Allocate a new local run directory under .agent-workflows/runs.
+# 4. Write a receipt template and human-readable brief for the review run.
+#
+# Function guide:
+# - run/git_output/optional_git_output/repo_root/git_status collect repo facts.
+# - parse_status_paths/read_json/read_text/command_summary normalize inputs.
+# - extract_section/first_heading/truncate summarize local documentation.
+# - latest_adr/kit_context/target_version_context/backlog_context gather governance context.
+# - should_consider_version_bump/load_persona_manifest/specialist_matches/recommend_personas choose review scope.
+# - ensure_runs_gitignore/build_receipt_template/allocate_run_dir create run artifacts.
+# - format_check_lines/format_persona_lines/build_brief/parse_docs_impact/main produce CLI output.
+
 VALID_MODES = {
     "bootstrap",
     "drift",

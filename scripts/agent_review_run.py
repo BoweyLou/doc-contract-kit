@@ -8,6 +8,22 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Script flow:
+# 1. Load the most recent agent-start run directory and its review inputs.
+# 2. Run selected review personas through the configured local agent command.
+# 3. Parse and validate each persona result plus the synthesis result.
+# 4. Write a structured receipt that captures findings, commands, and caveats.
+#
+# Function guide:
+# - run/git_output/repo_root/git_status wrap shell and git operations.
+# - read_json/write_json/relative/latest_run_dir handle filesystem state.
+# - load_personas/selected_persona_ids/load_permission_policy/policy_summary prepare review configuration.
+# - prompt_header/synthesis_prompt build prompts sent to the local agent.
+# - extract_json_from_text/extract_json_from_stream_events/extract_fenced_json/extract_balanced_json recover JSON output.
+# - validate_persona_payload/validate_synthesis_payload check model output shape.
+# - manual_persona_result/manual_synthesis_result provide fallback records.
+# - run_amp/load_receipt_template/build_receipt/main orchestrate the review run.
+
 VALID_REVIEW_MODES = {"bootstrap", "drift", "pull-request", "release-gate"}
 DEFAULT_PERSONAS = [
     "doc-code-delta",

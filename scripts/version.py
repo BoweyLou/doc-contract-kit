@@ -5,6 +5,18 @@ import re
 from datetime import date
 from pathlib import Path
 
+# Script flow:
+# 1. Read and validate the target repo VERSION file.
+# 2. Either check the current version or compute a SemVer bump.
+# 3. Ensure CHANGELOG.md exists before release note insertion.
+# 4. Write the new VERSION value and prepend a dated changelog section.
+#
+# Function guide:
+# - version_path/changelog_path locate version metadata under a supplied root.
+# - read_version/validate_version parse the existing SemVer value.
+# - bump_version computes major/minor/patch bumps.
+# - ensure_changelog/prepend_changelog_entry maintain release notes.
+# - main exposes the check and bump CLI commands.
 SEMVER_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 
 

@@ -7,6 +7,20 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+# Script flow:
+# 1. Discover agent-facing instruction files from known paths and glob patterns.
+# 2. Scan content for hidden characters, placeholders, unsafe guidance, and secret-like values.
+# 3. Check referenced commands and paths so instructions do not point at missing assets.
+# 4. Emit text or SARIF findings for local and CI usage.
+#
+# Function guide:
+# - normalize_candidate/is_path_like/candidate_path_roots/discover_files choose lint targets.
+# - check_hidden_chars/line_has_placeholder/check_secrets_and_unsafe_guidance scan content risks.
+# - make_targets/command_lines/check_command_references validate commands.
+# - check_rule_bloat_and_provenance/check_contradictions detect maintainability problems.
+# - referenced_paths/check_referenced_paths validate mentioned files.
+# - check_file/issue_dict/sarif_payload/print_issues/parse_args/main run and report linting.
+
 DEFAULT_FILES = [
     "AGENTS.md",
     "REVIEW.md",

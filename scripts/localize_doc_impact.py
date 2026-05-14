@@ -20,6 +20,16 @@ from check_doc_impact import (  # noqa: E402
     unique_paths,
 )
 
+# Script flow:
+# 1. Reuse check_doc_impact's change discovery and evaluation logic.
+# 2. Convert the evaluation into a local, JSON-friendly impact report.
+# 3. Print the report so an agent can decide which docs need attention.
+#
+# Function guide:
+# - changed_files_for_args chooses explicit, staged, working-tree, or branch changes.
+# - build_report converts doc-impact evaluation into structured output.
+# - parse_args/main drive the CLI wrapper.
+
 
 def changed_files_for_args(args):
     if args.changed_files:
