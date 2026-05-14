@@ -42,6 +42,7 @@ FILE_MAP = {
     "REVIEW.md": "REVIEW.md",
     "documentation-contract.md": "docs/documentation-contract.md",
     "ops-agent-workflow.md": "docs/ops/agent-workflow.md",
+    "agent-tool-network-allowlist.md": "docs/ops/agent-tool-network-allowlist.md",
     "adr-template.md": "docs/adr/0000-template.md",
     "pull_request_template.md": ".github/pull_request_template.md",
     "docs-workflow.yml": ".github/workflows/docs.yml",
@@ -50,6 +51,7 @@ FILE_MAP = {
     "Makefile": "Makefile",
     "session-receipt.schema.json": "schemas/session-receipt.schema.json",
     "review-synthesis.schema.json": "schemas/review-synthesis.schema.json",
+    "review-risk.schema.json": "schemas/review-risk.schema.json",
     "task-packet.schema.json": "schemas/task-packet.schema.json",
     "persona-manifest.schema.json": "schemas/persona-manifest.schema.json",
     "agent-permission-policy.schema.json": "schemas/agent-permission-policy.schema.json",
@@ -62,6 +64,7 @@ FILE_MAP = {
 CORE_SCRIPTS = [
     "agent_start.py",
     "agent_review_run.py",
+    "classify_review_risk.py",
     "check_doc_impact.py",
     "kit_status.py",
     "lint_agent_docs.py",
@@ -81,6 +84,7 @@ PROMPT_SNAPSHOT_PATHS = [
     "templates/profiles/local-agentic/files/.agent-workflows",
     "templates/common/persona-manifest.schema.json",
     "templates/common/review-synthesis.schema.json",
+    "templates/common/review-risk.schema.json",
     "templates/common/session-receipt.schema.json",
     "templates/common/task-packet.schema.json",
 ]

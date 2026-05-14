@@ -71,6 +71,22 @@
       "target": ".codex/prompts/personas/manifest.json"
     },
     {
+      "source": "files/.codex/prompts/policies/browser-research-agent.md",
+      "target": ".codex/prompts/policies/browser-research-agent.md"
+    },
+    {
+      "source": "files/.codex/prompts/policies/local-private-review.md",
+      "target": ".codex/prompts/policies/local-private-review.md"
+    },
+    {
+      "source": "files/.codex/prompts/policies/read-only-reviewer-sandbox.md",
+      "target": ".codex/prompts/policies/read-only-reviewer-sandbox.md"
+    },
+    {
+      "source": "files/.codex/prompts/policies/review-risk-classifier.md",
+      "target": ".codex/prompts/policies/review-risk-classifier.md"
+    },
+    {
       "source": "files/.codex/prompts/review-synthesis.md",
       "target": ".codex/prompts/review-synthesis.md"
     },

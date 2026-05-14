@@ -18,6 +18,26 @@
       "type": "boolean",
       "const": true
     },
+    "review_policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default_trust_profile", "mutation_default", "policy_documents"],
+      "properties": {
+        "default_trust_profile": {
+          "type": "string"
+        },
+        "mutation_default": {
+          "type": "string",
+          "enum": ["deny", "approval-required"]
+        },
+        "policy_documents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "personas": {
       "type": "array",
       "minItems": 1,

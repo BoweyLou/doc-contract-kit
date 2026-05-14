@@ -24,6 +24,17 @@ Produce:
 - High-risk surfaces: auth, persistence, migrations, background jobs, external APIs, generated code, scripts, deployment config.
 - Changed-file scope if reviewing a PR or commit range.
 
+Risk classification:
+- Run `python3 scripts/classify_review_risk.py --working-tree` when available,
+  or apply `.codex/prompts/policies/review-risk-classifier.md` manually to the
+  changed-file list.
+- Record the risk tier, trust profile, trigger rules, and selected specialist
+  personas in the session receipt.
+- Treat classification as routing guidance only; every finding still needs
+  concrete evidence.
+- For `high` or `critical` risk, keep the review read-only until a human accepts
+  a scoped implementation task.
+
 Phase 2: Choose reviewer roster
 Always dispatch:
 - Documentation/Code Delta Reviewer
@@ -39,6 +50,14 @@ Dispatch when applicable:
 - Dependencies and Build Reviewer for package files, CI, releases, containers, or generated clients.
 - Runtime and Observability Reviewer for services, jobs, CLIs, automations, and production-like operation.
 - Frontend UX Reviewer for web/mobile UI or user-facing flows.
+
+Policy prompts:
+- Apply `.codex/prompts/policies/read-only-reviewer-sandbox.md` for all review
+  personas by default.
+- Apply `.codex/prompts/policies/local-private-review.md` for private,
+  commercially sensitive, regulated, personal, or local-only repositories.
+- Apply `.codex/prompts/policies/browser-research-agent.md` before using a
+  browser session for source collection.
 
 Phase 3: Give each reviewer a tight brief
 For each agent:

@@ -33,6 +33,7 @@ covers the broader local repository contract for agentic development.
 - target-repo `kit-status` and `kit-update` commands
 - default target-repo versioning profile for agentic installs
 - `agent-start` kit/version context
+- `agent-start` review-risk and trust-profile context
 - `agent-run-review` manual/Amp read-only review runner artifacts
 - task-packet prompt/schema bridge for repo backlog mirrors and external planning systems
 - compatibility notes for existing `.doc-contract-kit/` install receipts

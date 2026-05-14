@@ -2,6 +2,16 @@
   "schema_version": 1,
   "local_first": true,
   "tool_agnostic": true,
+  "review_policies": {
+    "default_trust_profile": "read-only-review",
+    "mutation_default": "deny",
+    "policy_documents": [
+      ".codex/prompts/policies/review-risk-classifier.md",
+      ".codex/prompts/policies/read-only-reviewer-sandbox.md",
+      ".codex/prompts/policies/local-private-review.md",
+      ".codex/prompts/policies/browser-research-agent.md"
+    ]
+  },
   "personas": [
     {
       "id": "doc-code-delta",

@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 from datetime import datetime, timezone
+from dataclasses import dataclass
 from pathlib import Path
 
 # Script flow:
@@ -19,7 +20,8 @@ from pathlib import Path
 # - parse_status_paths/read_json/read_text/command_summary normalize inputs.
 # - extract_section/first_heading/truncate summarize local documentation.
 # - latest_adr/kit_context/target_version_context/backlog_context gather governance context.
-# - should_consider_version_bump/load_persona_manifest/specialist_matches/recommend_personas choose review scope.
+# - review_risk/classify_review_risk/should_consider_version_bump choose review scope.
+# - load_persona_manifest/specialist_matches/recommend_personas choose personas.
 # - ensure_runs_gitignore/build_receipt_template/allocate_run_dir create run artifacts.
 # - format_check_lines/format_persona_lines/build_brief/parse_docs_impact/main produce CLI output.
 
@@ -39,6 +41,88 @@ DEFAULT_REVIEW_PERSONAS = [
     "test-behavior-risk",
     "reuse-architecture",
 ]
+
+
+@dataclass(frozen=True)
+class RiskRule:
+    id: str
+    tier: str
+    personas: tuple[str, ...]
+    patterns: tuple[str, ...]
+    reason: str
+
+
+TIER_ORDER = {"low": 0, "medium": 1, "high": 2, "critical": 3}
+
+RISK_RULES = (
+    RiskRule(
+        id="auth-or-secrets",
+        tier="high",
+        personas=("security-privacy", "test-behavior-risk"),
+        patterns=("auth", "login", "session", "permission", "secret", "token", "credential", ".env"),
+        reason="auth, permission, token, credential, or secret-handling path",
+    ),
+    RiskRule(
+        id="data-deletion-or-destructive",
+        tier="critical",
+        personas=("security-privacy", "api-data-contracts", "test-behavior-risk"),
+        patterns=("delete", "destroy", "purge", "truncate", "wipe", "drop", "reset"),
+        reason="destructive data operation path or name",
+    ),
+    RiskRule(
+        id="migration-or-persistence",
+        tier="high",
+        personas=("api-data-contracts", "test-behavior-risk"),
+        patterns=("migration", "migrations/", "database", "db/", "schema", "schemas/", ".sql", "model"),
+        reason="migration, schema, database, or persisted data path",
+    ),
+    RiskRule(
+        id="public-api-or-contract",
+        tier="high",
+        personas=("api-data-contracts", "doc-code-delta", "test-behavior-risk"),
+        patterns=("api/", "openapi", "graphql", "webhook", "contract", "public", "sdk", "client"),
+        reason="public API, generated client, webhook, or contract path",
+    ),
+    RiskRule(
+        id="ci-build-release",
+        tier="medium",
+        personas=("dependencies-build", "runtime-observability"),
+        patterns=(
+            ".github/workflows",
+            "ci/",
+            "build",
+            "release",
+            "dockerfile",
+            "containerfile",
+            "makefile",
+            "package.json",
+            "pyproject.toml",
+            "requirements",
+        ),
+        reason="CI, build, packaging, or release path",
+    ),
+    RiskRule(
+        id="runtime-or-ops",
+        tier="medium",
+        personas=("runtime-observability",),
+        patterns=("deploy", "infra", "terraform", "helm", "service", "scheduler", "cron", "runbook", "ops/"),
+        reason="runtime, deployment, scheduling, or operations path",
+    ),
+    RiskRule(
+        id="docs-contract",
+        tier="medium",
+        personas=("doc-code-delta",),
+        patterns=("agents.md", "review.md", "doc-contract", "documentation-contract", "adr/", "docs/adr"),
+        reason="agent instruction, docs contract, or ADR path",
+    ),
+    RiskRule(
+        id="frontend-user-flow",
+        tier="medium",
+        personas=("frontend-ux", "test-behavior-risk"),
+        patterns=("frontend", "components/", "pages/", "routes/", ".tsx", ".jsx", ".vue", ".svelte", ".css"),
+        reason="frontend or user-flow path",
+    ),
+)
 
 SPECIALIST_RULES = [
     (
@@ -132,6 +216,74 @@ def parse_status_paths(status_output):
         if value:
             paths.append(value)
     return sorted(set(paths))
+
+
+def match_risk_rules(path):
+    lowered = path.lower().replace("\\", "/")
+    return [rule for rule in RISK_RULES if any(pattern in lowered for pattern in rule.patterns)]
+
+
+def review_risk_tier(triggers):
+    if not triggers:
+        return "low"
+    return max((trigger["tier"] for trigger in triggers), key=lambda tier: TIER_ORDER[tier])
+
+
+def review_trust_profile(tier, triggers):
+    rule_ids = {trigger["rule_id"] for trigger in triggers}
+    if "data-deletion-or-destructive" in rule_ids:
+        return "untrusted-pr"
+    if "auth-or-secrets" in rule_ids:
+        return "read-only-review"
+    if tier in {"high", "critical"}:
+        return "read-only-review"
+    return "read-only-review"
+
+
+def review_risk_guidance(tier, triggers):
+    guidance = [
+        "Reviewers are read-only by default: no file writes, git mutations, PR mutations, account mutations, or non-allowlisted network calls.",
+    ]
+    if tier in {"high", "critical"}:
+        guidance.append("Use specialist reviewers and require concrete file, command, docs, or runtime evidence before accepting findings.")
+    if any(trigger["rule_id"] == "auth-or-secrets" for trigger in triggers):
+        guidance.append("Do not expose secrets, tokens, cookies, private URLs, request bodies, or personal data in prompts or receipts.")
+    if any(trigger["rule_id"] == "data-deletion-or-destructive" for trigger in triggers):
+        guidance.append("Require human approval and rollback or recovery evidence before any write-capable follow-up.")
+    if not triggers:
+        guidance.append("No high-risk path trigger matched; keep the default small reviewer set unless the user request widens scope.")
+    return guidance
+
+
+def classify_review_risk(changed_files):
+    triggers = []
+    for path in changed_files:
+        for rule in match_risk_rules(path):
+            triggers.append(
+                {
+                    "path": path,
+                    "rule_id": rule.id,
+                    "tier": rule.tier,
+                    "reason": rule.reason,
+                    "personas": list(rule.personas),
+                }
+            )
+    tier = review_risk_tier(triggers)
+    return {
+        "schema_version": 1,
+        "risk_tier": tier,
+        "trust_profile": review_trust_profile(tier, triggers),
+        "triggers": triggers,
+        "guidance": review_risk_guidance(tier, triggers),
+        "policy_docs": [
+            "docs/ops/agent-tool-network-allowlist.md",
+            ".agent-workflows/agent-permission-policy.json",
+            ".codex/prompts/policies/review-risk-classifier.md",
+            ".codex/prompts/policies/read-only-reviewer-sandbox.md",
+            ".codex/prompts/policies/local-private-review.md",
+            ".codex/prompts/policies/browser-research-agent.md",
+        ],
+    }
 
 
 def read_json(path):
@@ -380,7 +532,7 @@ def specialist_matches(changed_files):
     return matches
 
 
-def recommend_personas(root, mode, changed_files, warnings):
+def recommend_personas(root, mode, changed_files, review_risk, warnings):
     manifest_path, personas_by_id = load_persona_manifest(root)
     if mode == "learning-comments":
         return [], [".codex/prompts/codebase-learning-comments.md"]
@@ -399,6 +551,10 @@ def recommend_personas(root, mode, changed_files, warnings):
     for persona in specialist_matches(changed_files):
         if persona not in selected:
             selected.append(persona)
+    for trigger in review_risk.get("triggers", []):
+        for persona in trigger.get("personas", []):
+            if persona not in selected:
+                selected.append(persona)
 
     recommended = []
     for persona_id in selected:
@@ -452,6 +608,14 @@ def build_receipt_template(run_id, started_at, mode, repo, changed_files):
             "changed_files": changed_files,
             "allowed_files": [],
             "protected_files": [],
+        },
+        "review_risk": {
+            "risk_tier": None,
+            "trust_profile": None,
+            "triggers": [],
+            "network_or_tool_allowlist_checked": False,
+            "mutation_boundary_checked": False,
+            "data_boundary_checked": False,
         },
         "evidence": {
             "files_inspected": [],
@@ -533,6 +697,16 @@ def build_brief(packet):
             "- No backlog mirror was found under docs/backlog.md.\n"
             "- Use an issue, accepted finding, user request, or external planning item as the task source."
         )
+    risk = packet["review_risk"]
+    if risk["triggers"]:
+        trigger_lines = "\n".join(
+            f"- `{trigger['path']}`: `{trigger['rule_id']}` ({trigger['tier']}) - {trigger['reason']}"
+            for trigger in risk["triggers"][:8]
+        )
+    else:
+        trigger_lines = "- No deterministic risk triggers matched the changed files."
+    risk_guidance = "\n".join(f"- {item}" for item in risk["guidance"])
+    policy_docs = "\n".join(f"- `{path}`" for path in risk["policy_docs"] if path)
 
     return f"""# Agent Start Brief
 
@@ -554,6 +728,7 @@ Treat latest ADRs as constraints/defaults; use the requested mode/backlog item a
 - Kit status: {kit['status']} (version `{kit['source_version'] or 'unknown'}`)
 - Prompt snapshot: `{(kit['prompt_snapshot'] or {}).get('name', 'agent-workflow-kit')}` ref `{(kit['prompt_snapshot'] or {}).get('source_ref', 'unknown')}`
 - Target repo version: `{versioning['target_version']['current'] or 'missing'}`
+- Review risk tier: `{risk['risk_tier']}` using trust profile `{risk['trust_profile']}`
 
 ## Kit And Versioning
 
@@ -565,6 +740,20 @@ Treat latest ADRs as constraints/defaults; use the requested mode/backlog item a
 ## Backlog And Task Packets
 
 {backlog_guidance}
+
+## Review Risk And Tool Boundary
+
+Triggers:
+
+{trigger_lines}
+
+Guidance:
+
+{risk_guidance}
+
+Policy docs:
+
+{policy_docs}
 
 ## Recommended Prompts
 
@@ -643,6 +832,7 @@ def main():
             warnings.append(f"{check['name']} returned {check['result']}; treat it as session context, not a startup blocker.")
 
     docs_impact = parse_docs_impact(localize, warnings)
+    review_risk = classify_review_risk(changed_files)
     kit = kit_context(root)
     backlog = backlog_context(root)
     versioning = {
@@ -662,7 +852,7 @@ def main():
         warnings.append("Backlog mirror exists but .codex/prompts/task-packet.md is missing. Install the review-prompts profile to enable backlog-to-task handoff.")
     if backlog["task_packet_prompt"] and not backlog["task_packet_schema"]:
         warnings.append("Task-packet prompt exists but schemas/task-packet.schema.json is missing. Refresh the installed kit files.")
-    recommended_personas, prompt_paths = recommend_personas(root, args.mode, changed_files, warnings)
+    recommended_personas, prompt_paths = recommend_personas(root, args.mode, changed_files, review_risk, warnings)
     for prompt_path in prompt_paths:
         if not (root / prompt_path).exists():
             warnings.append(
@@ -696,6 +886,7 @@ def main():
             "changed_files": changed_files,
         },
         "docs_impact": docs_impact,
+        "review_risk": review_risk,
         "kit": kit,
         "backlog": backlog,
         "versioning": versioning,
@@ -713,6 +904,9 @@ def main():
     }
 
     receipt = build_receipt_template(run_id, started_at, args.mode, root, changed_files)
+    receipt["review_risk"]["risk_tier"] = review_risk["risk_tier"]
+    receipt["review_risk"]["trust_profile"] = review_risk["trust_profile"]
+    receipt["review_risk"]["triggers"] = review_risk["triggers"]
     brief = build_brief(packet)
 
     session_path.write_text(json.dumps(packet, indent=2, sort_keys=True) + "\n", encoding="utf-8")

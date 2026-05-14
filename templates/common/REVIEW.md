@@ -16,6 +16,10 @@ hosted CI, or a specific coding agent is available.
   instructions.
 - Use `.agent-workflows/agent-permission-policy.json` to select an explicit
   trust profile before running read-only reviewers or write-capable workers.
+- Use `docs/ops/agent-tool-network-allowlist.md` to confirm allowed shell,
+  browser, network, MCP, Git, and CI surfaces before running agentic review.
+- Use the `review_risk` block from `make agent-start` to decide whether the
+  default reviewer set is enough or specialist reviewers are required.
 - Use `scripts/verify_agent_receipt.py --strict` before treating a JSON receipt
   as complete evidence.
 
@@ -37,6 +41,7 @@ with:
 - files inspected
 - commands run and results
 - docs-impact result
+- review risk tier and selected trust profile
 - TDD red/green evidence when behavior changed
 - findings with priority, confidence, evidence, recommendation, and disposition
 - skipped checks and reasons

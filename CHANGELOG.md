@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.2 - 2026-05-14
+
+- Add review-risk and trust-profile context to `make agent-start` packets and
+  receipt templates.
+- Install an agent tool/network allowlist doc and updated read-only review
+  guidance for target repos.
+- Refresh the vendored `agent-workflow-kit` prompt/schema snapshot with
+  review-risk and local/private/browser policy prompts.
+
 ## 0.4.1 - 2026-05-14
 
 - Add script-flow and function-guide comments across the repo-contract-kit

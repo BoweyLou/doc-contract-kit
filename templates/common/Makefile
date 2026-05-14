@@ -5,7 +5,7 @@ AGENT ?= manual
 AMP ?= amp
 RECEIPT ?=
 
-.PHONY: docs-lint docs-build docs-generate docs-check agent-start agent-run-review agent-receipt-verify agent-docs-lint agent-docs-localize agent-review agent-learn agent-task-packet agent-test-first agent-verify kit-status kit-update version-status version-check version-bump
+.PHONY: docs-lint docs-build docs-generate docs-check agent-start agent-run-review agent-receipt-verify agent-docs-lint agent-docs-localize agent-review agent-learn agent-review-risk agent-task-packet agent-test-first agent-verify kit-status kit-update version-status version-check version-bump
 
 docs-lint:
 	@echo "Running basic docs lint checks..."
@@ -86,6 +86,9 @@ agent-review:
 agent-learn:
 	@test -f .codex/prompts/codebase-learning-comments.md || (echo "Missing .codex/prompts/codebase-learning-comments.md; install the review-prompts profile." && exit 1)
 	@echo "Use .codex/prompts/codebase-learning-comments.md for learner-focused comments."
+
+agent-review-risk:
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/classify_review_risk.py --working-tree
 
 agent-task-packet:
 	@test -f .codex/prompts/task-packet.md || (echo "Missing .codex/prompts/task-packet.md; install the review-prompts profile." && exit 1)

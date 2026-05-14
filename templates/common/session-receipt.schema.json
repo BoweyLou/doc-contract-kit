@@ -109,6 +109,42 @@
         }
       }
     },
+    "review_risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["risk_tier", "trust_profile", "triggers"],
+      "properties": {
+        "risk_tier": {
+          "type": ["string", "null"],
+          "enum": ["low", "medium", "high", "critical", null]
+        },
+        "trust_profile": {
+          "type": ["string", "null"]
+        },
+        "triggers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "network_or_tool_allowlist_checked": {
+          "type": "boolean"
+        },
+        "mutation_boundary_checked": {
+          "type": "boolean"
+        },
+        "data_boundary_checked": {
+          "type": "boolean"
+        },
+        "approved_deviations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "evidence": {
       "type": "object",
       "additionalProperties": false,

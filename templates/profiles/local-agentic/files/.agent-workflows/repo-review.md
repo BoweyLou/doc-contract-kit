@@ -25,7 +25,8 @@ Use this workflow for a local agentic code review in a locked-down repository.
    ```
 
 3. Select the smallest reviewer set needed. Prefer one focused reviewer for
-   normal drift and add specialists only for high-risk areas.
+   normal drift and add specialists only for high-risk areas. Use the
+   `review_risk` block in the `make agent-start` packet as the routing signal.
 4. Optionally run `make agent-run-review AGENT=manual` to create persona prompts
    and review-run artifacts, or `make agent-run-review AGENT=amp` to execute the
    selected personas through Amp CLI.
@@ -47,6 +48,13 @@ Use this workflow for a local agentic code review in a locked-down repository.
 Add security, API/data contracts, dependencies/build, runtime, duplication, dead
 code, or frontend UX reviewers only when the changed files justify them.
 
+## Tool And Network Boundary
+
+Before running browser research, hosted CI adapters, external models, or
+write-capable workers, read `docs/ops/agent-tool-network-allowlist.md` and the
+selected trust profile in `.agent-workflows/agent-permission-policy.json`.
+Reviewer personas are read-only by default.
+
 ## Output
 
 Return:
@@ -56,6 +64,7 @@ Return:
   disposition
 - docs-impact result
 - commands run
+- review risk tier and selected trust profile
 - tests run or skipped with reasons
 - next local command the human should run
 

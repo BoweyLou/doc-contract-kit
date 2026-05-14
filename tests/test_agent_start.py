@@ -103,8 +103,12 @@ class AgentStartTests(unittest.TestCase):
             self.assertEqual(packet["backlog"]["task_packet_prompt"], ".codex/prompts/task-packet.md")
             self.assertEqual(packet["backlog"]["task_packet_schema"], "schemas/task-packet.schema.json")
             self.assertIn("make agent-task-packet", packet["next_commands"])
+            self.assertEqual(packet["review_risk"]["risk_tier"], "low")
+            self.assertEqual(packet["review_risk"]["trust_profile"], "read-only-review")
+            self.assertEqual(receipt["review_risk"]["risk_tier"], "low")
             self.assertIn("Kit And Versioning", brief)
             self.assertIn("Backlog And Task Packets", brief)
+            self.assertIn("Review Risk And Tool Boundary", brief)
 
     def test_agentic_packet_includes_backlog_mirror_context(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -207,7 +211,27 @@ class AgentStartTests(unittest.TestCase):
             persona_ids = [persona["id"] for persona in packet["recommended_personas"]]
             self.assertEqual(persona_ids[:4], ["doc-code-delta", "ai-code-slop", "test-behavior-risk", "reuse-architecture"])
             self.assertIn("api-data-contracts", persona_ids)
+            self.assertEqual(packet["review_risk"]["risk_tier"], "high")
+            self.assertTrue(any(trigger["rule_id"] == "public-api-or-contract" for trigger in packet["review_risk"]["triggers"]))
             self.assertTrue(packet["versioning"]["consider_bump"])
+
+    def test_review_risk_marks_destructive_paths_critical(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            init_repo(repo)
+            install(repo, "agentic")
+            commit_all(repo)
+            (repo / "scripts").mkdir(exist_ok=True)
+            (repo / "scripts" / "purge_accounts.py").write_text("print('purge')\n", encoding="utf-8")
+
+            result = run(["make", "agent-start"], repo)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            packet, receipt, brief = read_packet(repo)
+            self.assertEqual(packet["review_risk"]["risk_tier"], "critical")
+            self.assertEqual(packet["review_risk"]["trust_profile"], "untrusted-pr")
+            self.assertEqual(receipt["review_risk"]["risk_tier"], "critical")
+            self.assertIn("agent-tool-network-allowlist.md", brief)
 
     def test_minimal_profile_warns_when_prompt_files_are_missing(self):
         with tempfile.TemporaryDirectory() as tmp:

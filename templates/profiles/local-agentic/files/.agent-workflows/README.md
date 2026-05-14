@@ -46,6 +46,8 @@ Review runs load `.agent-workflows/agent-permission-policy.json`. The default
 profile is `read-only-review`; use `AGENT_TRUST_PROFILE=untrusted-pr` for
 fork-origin or otherwise untrusted changes so the run is artifact-only and has
 no PR mutation, account mutation, secret, or write-back expectation.
+The `make agent-start` packet also includes a `review_risk` block with the
+detected tier, trust profile, trigger rules, and policy docs.
 
 For manual startup, use:
 
@@ -69,6 +71,8 @@ For ongoing work after the first bootstrap review, change `bootstrap mode` to
 - `.agent-workflows/agent-permission-policy.json`: explicit local trust
   profiles for read-only reviewers, untrusted PRs, browser research, and scoped
   write workers.
+- `docs/ops/agent-tool-network-allowlist.md`: human-readable shell, browser,
+  network, MCP, Git, and CI boundary for agentic review.
 - `.agent-workflows/schemas/session-receipt.schema.json`: JSON receipt schema.
 - `.agent-workflows/schemas/safe-output.schema.json`: safe agent output schema.
 - `schemas/review-synthesis.schema.json`: JSON schema for synthesized review

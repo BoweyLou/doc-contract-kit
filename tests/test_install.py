@@ -50,6 +50,7 @@ class InstallTests(unittest.TestCase):
             self.assertEqual(agents.read_text(encoding="utf-8"), "existing agents\n")
             self.assertTrue((target / "doc-contract.json").exists())
             self.assertTrue((target / "scripts" / "agent_start.py").exists())
+            self.assertTrue((target / "scripts" / "classify_review_risk.py").exists())
             self.assertTrue((target / "scripts" / "check_doc_impact.py").exists())
             self.assertTrue((target / "scripts" / "kit_status.py").exists())
             self.assertTrue((target / "REVIEW.md").exists())
@@ -58,11 +59,13 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((target / "scripts" / "localize_doc_impact.py").exists())
             self.assertTrue((target / "scripts" / "verify_agent_receipt.py").exists())
             self.assertTrue((target / "schemas" / "session-receipt.schema.json").exists())
+            self.assertTrue((target / "schemas" / "review-risk.schema.json").exists())
             self.assertTrue((target / "schemas" / "persona-manifest.schema.json").exists())
             self.assertTrue((target / "schemas" / "agent-permission-policy.schema.json").exists())
             self.assertTrue((target / ".agent-workflows" / "agent-permission-policy.json").exists())
             self.assertTrue((target / ".agent-workflows" / "schemas" / "safe-output.schema.json").exists())
             self.assertTrue((target / ".github" / "workflows" / "agent-review-readonly.yml").exists())
+            self.assertTrue((target / "docs" / "ops" / "agent-tool-network-allowlist.md").exists())
             self.assertTrue((target / ".agent-workflows" / "runs" / ".gitignore").exists())
             self.assertTrue((target / ".doc-contract-kit" / "manifest.json").exists())
             self.assertTrue((target / ".doc-contract-kit" / "updates" / ".gitignore").exists())
@@ -182,6 +185,7 @@ class InstallTests(unittest.TestCase):
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue((target / ".codex" / "prompts" / "multi-agent-repo-review.md").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "policies" / "review-risk-classifier.md").exists())
             self.assertTrue((target / ".codex" / "prompts" / "task-packet.md").exists())
             self.assertTrue((target / ".codex" / "prompts" / "templates" / "task-packet.md").exists())
             self.assertTrue((target / ".codex" / "prompts" / "tdd" / "test-quality-sentinel.md").exists())
@@ -189,8 +193,10 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((target / ".agent-workflows" / "repo-review.md").exists())
             self.assertTrue((target / ".agent-workflows" / "schemas" / "session-receipt.schema.json").exists())
             self.assertTrue((target / "schemas" / "task-packet.schema.json").exists())
+            self.assertTrue((target / "schemas" / "review-risk.schema.json").exists())
             self.assertTrue((target / "schemas" / "review-synthesis.schema.json").exists())
             self.assertTrue((target / "docs" / "ops" / "agent-workflow.md").exists())
+            self.assertTrue((target / "docs" / "ops" / "agent-tool-network-allowlist.md").exists())
             self.assertTrue((target / "VERSION").exists())
             self.assertTrue((target / "CHANGELOG.md").exists())
             self.assertTrue((target / "docs" / "versioning.md").exists())
@@ -206,6 +212,7 @@ class InstallTests(unittest.TestCase):
             self.assertIn("kit-update:", makefile)
             self.assertIn("agent-review:", makefile)
             self.assertIn("agent-learn:", makefile)
+            self.assertIn("agent-review-risk:", makefile)
             self.assertIn("agent-task-packet:", makefile)
             self.assertIn("agent-test-first:", makefile)
             self.assertIn("agent-verify:", makefile)
@@ -221,6 +228,7 @@ class InstallTests(unittest.TestCase):
                 "kit-status",
                 "agent-review",
                 "agent-learn",
+                "agent-review-risk",
                 "agent-task-packet",
                 "agent-test-first",
                 "agent-docs-lint",
@@ -267,11 +275,12 @@ class InstallTests(unittest.TestCase):
             self.assertEqual(receipt["preset"], "agentic")
             self.assertEqual(receipt["profiles"], ["minimal", "local-agentic", "review-prompts", "test-first", "versioning"])
             self.assertEqual(receipt["source_version"], (ROOT / "VERSION").read_text(encoding="utf-8").strip())
-            self.assertEqual(receipt["prompt_snapshot"]["source_ref"], "2b25798ddbfb6e9c4e3b0953f114b3327023e5db")
+            snapshot = json.loads((ROOT / "agent-workflow-kit.snapshot.json").read_text(encoding="utf-8"))
+            self.assertEqual(receipt["prompt_snapshot"]["source_ref"], snapshot["source_ref"])
             self.assertIn("agent-workflow-kit", receipt["source_components"])
             self.assertEqual(
                 receipt["source_commits"]["agent-workflow-kit"],
-                "2b25798ddbfb6e9c4e3b0953f114b3327023e5db",
+                snapshot["source_ref"],
             )
 
             manifest = json.loads((target / ".doc-contract-kit" / "manifest.json").read_text(encoding="utf-8"))

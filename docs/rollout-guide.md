@@ -45,8 +45,12 @@ deliberately avoid binding the repository to one agent runtime.
 
 Use `make agent-start` first when you want the least friction. It creates an
 ignored session packet with the current repo state, docs-impact result, latest
-ADR context, recommended prompts/personas, and a receipt template for the
-agent's final evidence.
+ADR context, review-risk tier, selected trust profile, recommended
+prompts/personas, and a receipt template for the agent's final evidence.
+
+Before using browser research, hosted CI adapters, external models, or
+write-capable workers, read `docs/ops/agent-tool-network-allowlist.md` and the
+selected trust profile in `.agent-workflows/agent-permission-policy.json`.
 
 Use `make agent-run-review AGENT=manual` to turn the latest session packet into
 one prompt per selected reviewer plus review-run JSON artifacts. Use

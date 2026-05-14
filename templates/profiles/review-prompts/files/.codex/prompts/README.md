@@ -16,6 +16,10 @@ Markdown files directly from the checkout.
 - `fix-planner.md`: Converts accepted findings into scoped implementation batches.
 - `fix-implementer.md`: Applies a selected batch without widening scope.
 - `verification-sentinel.md`: Validates claims, tests, and residual risk after remediation.
+- `policies/review-risk-classifier.md`: Deterministic changed-path risk routing for reviewer selection.
+- `policies/read-only-reviewer-sandbox.md`: Default mutation and evidence boundary for reviewer personas.
+- `policies/local-private-review.md`: Data-boundary guidance for private/local review modes.
+- `policies/browser-research-agent.md`: Account-safety policy for browser-based source collection.
 - `tdd/`: Test-first and executable-spec prompt set for feature work, bug fixes, refactors, contracts, invariants, and test-quality review.
 
 ## Persona Reviewers
@@ -50,6 +54,8 @@ findings.
   scope, acceptance criteria, validation, docs impact, risk, and approval state.
 - `schemas/persona-manifest.schema.json`: Validator schema for the persona
   manifest.
+- `schemas/review-risk.schema.json`: Machine-readable risk classifier output
+  schema.
 
 ## Recommended Dispatch
 
@@ -73,3 +79,8 @@ For a mature repo or release gate, add:
 For understanding a repo as a learner, run `codebase-learning-comments.md` instead of the defect-review flow.
 
 For implementing accepted changes test-first, use `tdd/README.md` to choose the right executable-spec prompt.
+
+Run `python3 scripts/classify_review_risk.py --working-tree` before broad
+review dispatch when the script is available. Use the result to decide whether
+the default reviewer set is enough or whether security, API/data, dependency,
+runtime, or frontend specialists should be added.

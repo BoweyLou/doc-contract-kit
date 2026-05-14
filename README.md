@@ -18,6 +18,7 @@ tests, receipts, and tool-agnostic workflows.
 - agent instruction linting for local prompt/rule files
 - explicit permission policies for read-only review, untrusted PRs, browser
   research, and scoped write workers
+- review-risk and trust-profile startup context
 - evidence receipt and safe-output schemas
 - TDD/executable-spec workflow profiles
 - safe local kit updates with managed-file conflict reports
@@ -130,6 +131,9 @@ make agent-start MODE=test-first
 The command writes an ignored local packet under `.agent-workflows/runs/` with
 an agent brief, machine-readable startup context, and a receipt template. It
 records failed discovery checks as warnings instead of blocking startup.
+The packet includes a `review_risk` block with the risk tier, selected trust
+profile, trigger rules, policy docs, and guidance for whether specialist
+reviewers are needed.
 
 If you want to start manually, point Codex, AmpCode, or another local coding
 agent at the target repo and give it this brief:
@@ -310,6 +314,7 @@ The `review-prompts` profile also installs:
 - `.codex/prompts/codebase-learning-comments.md`
 - `.codex/prompts/task-packet.md`
 - `.codex/prompts/personas/`
+- `.codex/prompts/policies/`
 - `.codex/prompts/templates/`
 - remediation and verification prompts
 
@@ -362,8 +367,8 @@ features, bug fixes, refactors, API contracts, and high-risk cleanup.
 Installed target repos get Makefile entrypoints:
 
 - `make agent-start`: write an ignored local session packet with an agent
-  brief, startup context, latest ADR context, kit/version context, recommended
-  prompts/personas, and a receipt template.
+  brief, startup context, latest ADR context, review-risk tier, kit/version
+  context, recommended prompts/personas, and a receipt template.
 - `make kit-status`: show installed kit version, source ref, prompt snapshot
   ref/hash, profiles, managed manifest status, managed-file cleanliness, and
   target repo version.

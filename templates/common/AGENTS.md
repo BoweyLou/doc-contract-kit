@@ -16,13 +16,16 @@ If asked to review, understand, clean up, or formalize this repo, start here:
 3. Inspect `make kit-status` and `make version-status` output when available so
    you know the installed kit version, vendored prompt snapshot, and target repo
    version.
-4. Follow `.agent-workflows/repo-review.md` in the requested mode. Use
+4. Inspect `docs/ops/agent-tool-network-allowlist.md` and the selected trust
+   profile in `.agent-workflows/agent-permission-policy.json` before running
+   review agents, browser research, or CI adapters.
+5. Follow `.agent-workflows/repo-review.md` in the requested mode. Use
    `bootstrap` for the first review of an inherited or newly instrumented repo.
-5. Use the installed personas and prompts under `.codex/prompts/` where useful.
-6. Run `make agent-verify` and `make agent-docs-localize` before proposing code
+6. Use the installed personas and prompts under `.codex/prompts/` where useful.
+7. Run `make agent-verify` and `make agent-docs-localize` before proposing code
    changes.
-7. Produce a findings backlog before editing code.
-8. If work starts from a backlog item, issue, accepted finding, or broad human
+8. Produce a findings backlog before editing code.
+9. If work starts from a backlog item, issue, accepted finding, or broad human
    request, run `make agent-task-packet` and convert one selected item into
    scoped executable work before implementation.
 
@@ -75,6 +78,10 @@ available and you need a `current`/`available` update signal. Use
 `make kit-update KIT=/path/to/repo-contract-kit` only when the user asks to
 refresh the local kit files. Customized managed files must be preserved; review
 proposed replacements under `.doc-contract-kit/updates/`.
+
+Use the review-risk tier from `make agent-start` to choose the smallest safe
+reviewer set. High-risk or critical changes should stay read-only until a human
+accepts a scoped implementation task.
 
 ## ADR rules
 
