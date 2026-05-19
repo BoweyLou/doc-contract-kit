@@ -87,6 +87,38 @@
       "target": ".codex/prompts/policies/review-risk-classifier.md"
     },
     {
+      "source": "files/.codex/prompts/research/README.md",
+      "target": ".codex/prompts/research/README.md"
+    },
+    {
+      "source": "files/.codex/prompts/research/research-brief.md",
+      "target": ".codex/prompts/research/research-brief.md"
+    },
+    {
+      "source": "files/.codex/prompts/research/research-synthesis.md",
+      "target": ".codex/prompts/research/research-synthesis.md"
+    },
+    {
+      "source": "files/.codex/prompts/research/research-to-backlog.md",
+      "target": ".codex/prompts/research/research-to-backlog.md"
+    },
+    {
+      "source": "files/.codex/prompts/research/source-arxiv.md",
+      "target": ".codex/prompts/research/source-arxiv.md"
+    },
+    {
+      "source": "files/.codex/prompts/research/source-github.md",
+      "target": ".codex/prompts/research/source-github.md"
+    },
+    {
+      "source": "files/.codex/prompts/research/source-hacker-news.md",
+      "target": ".codex/prompts/research/source-hacker-news.md"
+    },
+    {
+      "source": "files/.codex/prompts/research/source-official-docs.md",
+      "target": ".codex/prompts/research/source-official-docs.md"
+    },
+    {
       "source": "files/.codex/prompts/review-synthesis.md",
       "target": ".codex/prompts/review-synthesis.md"
     },

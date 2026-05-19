@@ -16,7 +16,7 @@
       },
       "shell": {
         "mode": "allowlisted",
-        "allowlist": ["git status", "git diff", "rg", "sed", "python3 -m json.tool", "make agent-verify"],
+        "allowlist": ["git status", "git diff", "rg", "sed", "python3 -m json.tool", "make workflow-help", "make agent-verify"],
         "denylist": ["rm", "git reset", "git checkout --", "git push", "git clean"]
       },
       "git": {
@@ -191,7 +191,7 @@
       },
       "shell": {
         "mode": "allowlisted",
-        "allowlist": ["osascript", "python3 -m json.tool", "rg"],
+        "allowlist": ["osascript", "python3 -m json.tool", "python3 scripts/agent_research.py", "rg"],
         "denylist": ["rm", "git reset", "git push"]
       },
       "git": {

@@ -7,12 +7,39 @@ RECEIPT ?=
 TASK ?=
 TITLE ?=
 SCOPE ?=
+RESEARCH_TITLE ?=
+RESEARCH_QUESTION ?=
+RESEARCH_CONTEXT ?=
+RESEARCH_SOURCES ?= github,arxiv,hacker-news,official-docs
+RESEARCH_SOURCE ?= github
+RESEARCH_OUTPUT ?= backlog
+RESEARCH_QUERY ?=
+RESEARCH_SCOPE ?=
 BASE_REF ?= HEAD
 WORKTREE_ROOT ?=
 OVERLAP ?= warn
 ALLOW_DIRTY ?= 0
 
-.PHONY: docs-lint docs-build docs-generate docs-check agent-start agent-task-prepare agent-run-review agent-receipt-verify agent-docs-lint agent-docs-localize agent-review agent-learn agent-review-risk agent-task-packet agent-test-first agent-verify kit-status kit-update version-status version-check version-bump
+.PHONY: help workflow-help docs-lint docs-build docs-generate docs-check agent-start agent-task-prepare agent-run-review agent-research-plan agent-research-run agent-research-synthesize agent-research-to-task-packet agent-receipt-verify agent-docs-lint agent-docs-localize agent-review agent-learn agent-review-risk agent-task-packet agent-test-first agent-verify kit-status kit-update version-status version-check version-bump
+
+help: workflow-help
+
+workflow-help:
+	@printf "%s\n" \
+		"repo-contract-kit working rhythm" \
+		"" \
+		"1. Orient" \
+		"   make agent-start" \
+		"   make kit-status" \
+		"2. Review" \
+		"   make agent-run-review AGENT=manual" \
+		"3. Scope" \
+		"   make agent-task-packet" \
+		"4. Execute" \
+		"   make agent-task-prepare TASK=<id> SCOPE=<paths>" \
+		"   make agent-verify" \
+		"" \
+		"Read docs/working-rhythm.md for common paths and the mental model."
 
 docs-lint:
 	@echo "Running basic docs lint checks..."
@@ -48,6 +75,28 @@ agent-task-prepare:
 
 agent-run-review:
 	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_review_run.py --mode "$(MODE)" --agent "$(AGENT)" --amp-command "$(AMP)"
+
+agent-research-plan:
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_research.py plan \
+		--title "$(RESEARCH_TITLE)" \
+		--question "$(RESEARCH_QUESTION)" \
+		--context "$(RESEARCH_CONTEXT)" \
+		--sources "$(RESEARCH_SOURCES)" \
+		--output "$(RESEARCH_OUTPUT)" \
+		--query "$(RESEARCH_QUERY)" \
+		--scope "$(RESEARCH_SCOPE)"
+
+agent-research-run:
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_research.py run \
+		--source "$(RESEARCH_SOURCE)" \
+		--query "$(RESEARCH_QUERY)" \
+		--scope "$(RESEARCH_SCOPE)"
+
+agent-research-synthesize:
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_research.py synthesize
+
+agent-research-to-task-packet:
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_research.py to-task-packet
 
 agent-receipt-verify:
 	@if test -n "$(RECEIPT)"; then \

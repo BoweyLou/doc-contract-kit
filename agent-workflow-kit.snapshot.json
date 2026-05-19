@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "name": "agent-workflow-kit",
-  "version": "0.2.0-beta.6",
+  "version": "0.2.0-beta.11",
   "source_url": "https://github.com/BoweyLou/agent-workflow-kit",
-  "source_ref": "89e7f33eed43ac7afc6e6b42b22a1dc3d78d3a9f+local",
+  "source_ref": "d95a3a649f01+local",
   "source_prompt_root": "workflows/prompts",
   "generated_adapter": ".codex/prompts",
-  "snapshot_sha256": "4f3f50e390ab6a4b505fea966473946c3d6c6848f546d10484a1062e2e05e351",
-  "vendored_at": "2026-05-14",
+  "snapshot_sha256": "a8d6c30e34cfeaa32fe92eeae5bc6eef33fdc1ba72e692529958296bc6dc8fce",
+  "vendored_at": "2026-05-19",
   "snapshot_paths": [
     "templates/profiles/review-prompts/files/.codex/prompts",
     "templates/profiles/test-first/files/.codex/prompts",
@@ -16,7 +16,10 @@
     "templates/common/review-synthesis.schema.json",
     "templates/common/review-risk.schema.json",
     "templates/common/session-receipt.schema.json",
-    "templates/common/task-packet.schema.json"
+    "templates/common/task-packet.schema.json",
+    "templates/common/research-brief.schema.json",
+    "templates/common/research-source-report.schema.json",
+    "templates/common/research-synthesis.schema.json"
   ],
   "notes": "Records the upstream prompt/schema snapshot generated from agent-workflow-kit workflows/prompts and vendored into repo-contract-kit target-repo adapters. The +local source ref marks a working-tree snapshot."
 }

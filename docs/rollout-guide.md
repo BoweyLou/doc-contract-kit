@@ -23,6 +23,8 @@ If this is all new to you, adopt it in layers.
 
 After install, use these target-repo commands:
 
+- `make help`
+- `make workflow-help`
 - `make agent-start`
 - `make kit-status`
 - `make kit-status KIT=/path/to/repo-contract-kit`
@@ -43,6 +45,10 @@ After install, use these target-repo commands:
 
 The agent commands print the local workflow or prompt path to use. They
 deliberately avoid binding the repository to one agent runtime.
+
+Use `make workflow-help` first when the command list is unfamiliar. It presents
+the everyday rhythm as four moves: orient, review, scope, and execute. The same
+model is documented in `docs/working-rhythm.md` inside installed target repos.
 
 Use `make agent-start` first when you want the least friction. It creates an
 ignored session packet with the current repo state, docs-impact result, latest

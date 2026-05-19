@@ -6,6 +6,10 @@ GitHub Actions, hosted CI, or a specific coding assistant.
 Use them from AmpCode, Codex, Claude Code, Aider, Cline, another local agent, or
 a human terminal session.
 
+For the operator mental model, start with `docs/working-rhythm.md`. This file
+is the mechanics reference for local packets, review-run artifacts, permissions,
+and installed workflow files.
+
 ## Start an Agent
 
 Give the agent this brief from the repository root:
@@ -84,6 +88,7 @@ For ongoing work after the first bootstrap review, change `bootstrap mode` to
 Run these from the repository root:
 
 ```bash
+make workflow-help
 make agent-start
 make agent-run-review AGENT=manual
 make kit-status

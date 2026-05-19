@@ -20,6 +20,8 @@ tests, receipts, and tool-agnostic workflows.
 - explicit permission policies for read-only review, untrusted PRs, browser
   research, and scoped write workers
 - review-risk and trust-profile startup context
+- targeted research commands for source-specific backlog, review, design, and
+  architecture discovery
 - evidence receipt and safe-output schemas
 - TDD/executable-spec workflow profiles
 - safe local kit updates with managed-file conflict reports
@@ -100,6 +102,7 @@ tmp="$(mktemp -d)" && git clone --depth 1 https://github.com/BoweyLou/repo-contr
 Then inside the target repo:
 
 ```bash
+make workflow-help
 make agent-start
 make kit-status
 make docs-check
@@ -108,12 +111,20 @@ make agent-docs-localize
 make agent-review
 make agent-run-review AGENT=manual
 make agent-run-review AGENT=manual AGENT_TRUST_PROFILE=untrusted-pr
+make agent-research-plan
+make agent-research-run RESEARCH_SOURCE=github
+make agent-research-synthesize
+make agent-research-to-task-packet
 make agent-receipt-verify
 make agent-task-packet
 make agent-task-prepare TASK=<id> SCOPE=<paths>
 make agent-test-first
 make version-check
 ```
+
+The everyday rhythm is four moves: orient, review, scope, execute. Use
+`make workflow-help` or `docs/working-rhythm.md` in the target repo before
+digging into the lower-level command reference.
 
 ## Start an Agent in an Existing Repo
 
@@ -286,6 +297,7 @@ The kit currently installs:
 - `AGENTS.md`
 - `REVIEW.md`
 - `docs/documentation-contract.md`
+- `docs/working-rhythm.md`
 - `docs/ops/agent-workflow.md`
 - `docs/ops/agent-instruction-hygiene.md`
 - `docs/adr/0000-template.md`
@@ -370,6 +382,8 @@ features, bug fixes, refactors, API contracts, and high-risk cleanup.
 
 Installed target repos get Makefile entrypoints:
 
+- `make help` / `make workflow-help`: print the orient, review, scope, execute
+  rhythm and point to `docs/working-rhythm.md`.
 - `make agent-start`: write an ignored local session packet with an agent
   brief, startup context, latest ADR context, review-risk tier, kit/version
   context, recommended prompts/personas, and a receipt template.
@@ -443,7 +457,10 @@ See:
 Run the test suite with:
 
 ```bash
-python3 -m unittest discover -s tests
+make workflow-help
+make test
+make docs-check
+make version-check
 ```
 
 ## Development status

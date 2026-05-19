@@ -51,6 +51,7 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((target / "doc-contract.json").exists())
             self.assertTrue((target / "scripts" / "agent_start.py").exists())
             self.assertTrue((target / "scripts" / "agent_task_prepare.py").exists())
+            self.assertTrue((target / "scripts" / "agent_research.py").exists())
             self.assertTrue((target / "scripts" / "classify_review_risk.py").exists())
             self.assertTrue((target / "scripts" / "check_doc_impact.py").exists())
             self.assertTrue((target / "scripts" / "kit_status.py").exists())
@@ -61,6 +62,9 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((target / "scripts" / "verify_agent_receipt.py").exists())
             self.assertTrue((target / "schemas" / "session-receipt.schema.json").exists())
             self.assertTrue((target / "schemas" / "review-risk.schema.json").exists())
+            self.assertTrue((target / "schemas" / "research-brief.schema.json").exists())
+            self.assertTrue((target / "schemas" / "research-source-report.schema.json").exists())
+            self.assertTrue((target / "schemas" / "research-synthesis.schema.json").exists())
             self.assertTrue((target / "schemas" / "persona-manifest.schema.json").exists())
             self.assertTrue((target / "schemas" / "agent-permission-policy.schema.json").exists())
             self.assertTrue((target / ".agent-workflows" / "agent-permission-policy.json").exists())
@@ -190,6 +194,11 @@ class InstallTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue((target / ".codex" / "prompts" / "multi-agent-repo-review.md").exists())
             self.assertTrue((target / ".codex" / "prompts" / "policies" / "review-risk-classifier.md").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "research" / "research-brief.md").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "research" / "source-github.md").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "research" / "source-arxiv.md").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "research" / "source-hacker-news.md").exists())
+            self.assertTrue((target / ".codex" / "prompts" / "research" / "source-official-docs.md").exists())
             self.assertTrue((target / ".codex" / "prompts" / "task-packet.md").exists())
             self.assertTrue((target / ".codex" / "prompts" / "templates" / "task-packet.md").exists())
             self.assertTrue((target / ".codex" / "prompts" / "tdd" / "test-quality-sentinel.md").exists())
@@ -201,6 +210,7 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((target / "schemas" / "review-synthesis.schema.json").exists())
             self.assertTrue((target / "docs" / "ops" / "agent-workflow.md").exists())
             self.assertTrue((target / "docs" / "ops" / "agent-tool-network-allowlist.md").exists())
+            self.assertTrue((target / "docs" / "working-rhythm.md").exists())
             self.assertTrue((target / "VERSION").exists())
             self.assertTrue((target / "CHANGELOG.md").exists())
             self.assertTrue((target / "docs" / "versioning.md").exists())
@@ -209,9 +219,15 @@ class InstallTests(unittest.TestCase):
             self.assertIn("AGENT_TRUST_PROFILE: untrusted-pr", readonly_workflow)
 
             makefile = (target / "Makefile").read_text(encoding="utf-8")
+            self.assertIn("help: workflow-help", makefile)
+            self.assertIn("workflow-help:", makefile)
             self.assertIn("agent-start:", makefile)
             self.assertIn("agent-task-prepare:", makefile)
             self.assertIn("agent-run-review:", makefile)
+            self.assertIn("agent-research-plan:", makefile)
+            self.assertIn("agent-research-run:", makefile)
+            self.assertIn("agent-research-synthesize:", makefile)
+            self.assertIn("agent-research-to-task-packet:", makefile)
             self.assertIn("agent-receipt-verify:", makefile)
             self.assertIn("kit-status:", makefile)
             self.assertIn("kit-update:", makefile)
@@ -228,8 +244,14 @@ class InstallTests(unittest.TestCase):
             self.assertIn("version-bump:", makefile)
 
             for target_name in (
+                "help",
+                "workflow-help",
                 "agent-start",
                 "agent-run-review",
+                "agent-research-plan",
+                "agent-research-run",
+                "agent-research-synthesize",
+                "agent-research-to-task-packet",
                 "kit-status",
                 "agent-review",
                 "agent-learn",
@@ -251,6 +273,12 @@ class InstallTests(unittest.TestCase):
                 )
                 self.assertEqual(make_result.returncode, 0, make_result.stderr)
 
+                if target_name in {"help", "workflow-help"}:
+                    self.assertIn("Orient", make_result.stdout)
+                    self.assertIn("Review", make_result.stdout)
+                    self.assertIn("Scope", make_result.stdout)
+                    self.assertIn("Execute", make_result.stdout)
+
                 if target_name == "agent-start":
                     self.assertIn("Agent start packet written", make_result.stdout)
 
@@ -271,6 +299,18 @@ class InstallTests(unittest.TestCase):
                     latest = sorted(run_dirs)[-1]
                     self.assertTrue((latest / "review-run" / "review-run.json").exists())
                     self.assertTrue((latest / "review-run" / "synthesis" / "review-synthesis.json").exists())
+
+                if target_name == "agent-research-plan":
+                    self.assertIn("Research plan written", make_result.stdout)
+
+                if target_name == "agent-research-run":
+                    self.assertIn("Source research prompt written", make_result.stdout)
+
+                if target_name == "agent-research-synthesize":
+                    self.assertIn("Research synthesis prompt written", make_result.stdout)
+
+                if target_name == "agent-research-to-task-packet":
+                    self.assertIn("Research handoff prompt written", make_result.stdout)
 
                 if target_name == "kit-status":
                     self.assertIn("agent-workflow-kit snapshot:", make_result.stdout)

@@ -9,17 +9,26 @@ agents such as Codex, AmpCode, Claude Code, Aider, or Cline.
 Use these commands before committing agent-generated or agent-assisted work:
 
 ```bash
+make workflow-help
 make agent-start
 make kit-status
 make docs-check
 make agent-docs-lint
 make agent-docs-localize
+make agent-research-plan
+make agent-research-run RESEARCH_SOURCE=github
+make agent-research-synthesize
+make agent-research-to-task-packet
 make agent-task-packet
 make agent-task-prepare TASK=<id> SCOPE=<paths>
 make agent-receipt-verify
 make agent-verify
 make version-check
 ```
+
+`make workflow-help` prints the four-move rhythm: orient, review, scope, and
+execute. Use `docs/working-rhythm.md` as the human-facing entrypoint when the
+command list feels too wide.
 
 `make agent-verify` is the default local gate. It runs the available
 documentation and agent-instruction checks for the installed profile.
@@ -51,6 +60,13 @@ a backlog row, issue, accepted review finding, external planning item, or broad
 human request needs to become scoped executable work before implementation
 starts.
 
+`make agent-research-plan` creates a read-only targeted-research packet under
+`.agent-workflows/runs/`. Use `make agent-research-run
+RESEARCH_SOURCE=github|arxiv|hacker-news|official-docs` to create source-agent
+prompts and source-report templates, then `make agent-research-synthesize` and
+`make agent-research-to-task-packet` to turn accepted evidence into proposed
+backlog, review, design, architecture, ADR, risk, or task-packet handoffs.
+
 `make agent-task-prepare TASK=<id> SCOPE=<paths>` creates a write-capable task
 branch and sibling worktree, writes a task packet and receipt template under
 `.agent-workflows/tasks/` in that worktree, and records local in-flight metadata
@@ -75,6 +91,8 @@ only when the accepted change needs a target repo version bump.
 
 - `AGENTS.md` defines repo-local operating rules for coding agents.
 - `REVIEW.md` defines the review contract.
+- `docs/working-rhythm.md` defines the everyday orient, review, scope, execute
+  flow.
 - `.agent-workflows/` contains tool-agnostic workflow guidance and receipt
   schemas.
 - `.agent-workflows/agent-permission-policy.json` contains local trust profiles
@@ -85,6 +103,9 @@ only when the accepted change needs a target repo version bump.
   worktree-per-task write workers.
 - `.codex/prompts/` contains reusable prompts. The files can be read by other
   agents or used manually; they are not limited to Codex.
+- `schemas/research-brief.schema.json`,
+  `schemas/research-source-report.schema.json`, and
+  `schemas/research-synthesis.schema.json` define targeted research artifacts.
 - `schemas/task-packet.schema.json` defines the machine-readable handoff from
   backlog item to agent task.
 - `.github/workflows/docs.yml` is an optional hosted adapter for repos that can

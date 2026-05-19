@@ -41,6 +41,7 @@ unless the user explicitly asks you to refresh the kit.
 ## Where documentation lives
 
 - `README.md` — high-level overview and getting started
+- `docs/working-rhythm.md` — human-facing operator rhythm and mental model
 - `docs/` — project documentation
 - `docs/adr/` — architecture decision records
 - `doc-contract.json` — repository-specific documentation impact rules

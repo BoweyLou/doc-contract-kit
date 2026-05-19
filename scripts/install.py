@@ -41,6 +41,7 @@ FILE_MAP = {
     "AGENTS.md": "AGENTS.md",
     "REVIEW.md": "REVIEW.md",
     "documentation-contract.md": "docs/documentation-contract.md",
+    "working-rhythm.md": "docs/working-rhythm.md",
     "ops-agent-workflow.md": "docs/ops/agent-workflow.md",
     "agent-instruction-hygiene.md": "docs/ops/agent-instruction-hygiene.md",
     "agent-tool-network-allowlist.md": "docs/ops/agent-tool-network-allowlist.md",
@@ -54,6 +55,9 @@ FILE_MAP = {
     "review-synthesis.schema.json": "schemas/review-synthesis.schema.json",
     "review-risk.schema.json": "schemas/review-risk.schema.json",
     "task-packet.schema.json": "schemas/task-packet.schema.json",
+    "research-brief.schema.json": "schemas/research-brief.schema.json",
+    "research-source-report.schema.json": "schemas/research-source-report.schema.json",
+    "research-synthesis.schema.json": "schemas/research-synthesis.schema.json",
     "persona-manifest.schema.json": "schemas/persona-manifest.schema.json",
     "agent-permission-policy.schema.json": "schemas/agent-permission-policy.schema.json",
     "agent-permission-policy.json": ".agent-workflows/agent-permission-policy.json",
@@ -66,6 +70,7 @@ FILE_MAP = {
 
 CORE_SCRIPTS = [
     "agent_task_prepare.py",
+    "agent_research.py",
     "agent_start.py",
     "agent_review_run.py",
     "classify_review_risk.py",
@@ -91,6 +96,9 @@ PROMPT_SNAPSHOT_PATHS = [
     "templates/common/review-risk.schema.json",
     "templates/common/session-receipt.schema.json",
     "templates/common/task-packet.schema.json",
+    "templates/common/research-brief.schema.json",
+    "templates/common/research-source-report.schema.json",
+    "templates/common/research-synthesis.schema.json",
 ]
 
 
@@ -464,13 +472,23 @@ def main():
         print(f"Preset: {args.preset}")
     print("Next steps:")
     print(f"  cd {target}")
+    print("  make workflow-help")
+    print("  # Orient")
     print("  make agent-start")
     print("  make kit-status")
+    print("  # Verify local guardrails")
     print("  make docs-check")
     print("  pre-commit install")
     if "review-prompts" in profiles:
-        print("  run make agent-review, make agent-run-review, or make agent-learn when you want agent guidance")
-        print("  run make agent-task-prepare TASK=<id> SCOPE=<paths> before write-capable task work")
+        print("  # Review")
+        print("  make agent-run-review AGENT=manual")
+        print("  # Research")
+        print("  make agent-research-plan")
+        print("  # Scope")
+        print("  make agent-task-packet")
+        print("  # Execute approved write work")
+        print("  make agent-task-prepare TASK=<id> SCOPE=<paths>")
+        print("  run make agent-review or make agent-learn when you want prompt guidance")
     if "test-first" in profiles:
         print("  review docs/testing-strategy.md and .codex/prompts/tdd/ before the next behavior change")
     if "local-agentic" in profiles:

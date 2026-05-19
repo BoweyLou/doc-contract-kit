@@ -1,7 +1,8 @@
 # Prompt Index
 
 Use these prompts as the workflow library for `agent-workflow-kit`: portable
-multi-agent review, learning, remediation, TDD, and verification workflows.
+multi-agent review, learning, targeted research, remediation, TDD, and
+verification workflows.
 
 The prompt content is tool agnostic. Codex can read it from `.codex/prompts/`,
 but AmpCode, Claude Code, Aider, Cline, or a manual reviewer can use the same
@@ -16,6 +17,7 @@ Markdown files directly from the checkout.
 - `fix-planner.md`: Converts accepted findings into scoped implementation batches.
 - `fix-implementer.md`: Applies a selected batch without widening scope.
 - `verification-sentinel.md`: Validates claims, tests, and residual risk after remediation.
+- `research/`: Targeted source-specific research workflows for backlog, review, architecture, design, ADR, risk, and task-packet discovery.
 - `policies/review-risk-classifier.md`: Deterministic changed-path risk routing for reviewer selection.
 - `policies/read-only-reviewer-sandbox.md`: Default mutation and evidence boundary for reviewer personas.
 - `policies/local-private-review.md`: Data-boundary guidance for private/local review modes.
@@ -52,6 +54,13 @@ findings.
   and final disposition.
 - `schemas/task-packet.schema.json`: Machine-readable task packet schema for
   scope, acceptance criteria, validation, docs impact, risk, and approval state.
+- `schemas/research-brief.schema.json`: Machine-readable brief for bounded
+  source-specific research dispatch.
+- `schemas/research-source-report.schema.json`: Machine-readable evidence report
+  from one source-specific research agent.
+- `schemas/research-synthesis.schema.json`: Machine-readable synthesis of
+  research reports into proposed backlog, review, design, ADR, risk, or
+  task-packet outputs.
 - `schemas/persona-manifest.schema.json`: Validator schema for the persona
   manifest.
 - `schemas/review-risk.schema.json`: Machine-readable risk classifier output
@@ -77,6 +86,10 @@ For a mature repo or release gate, add:
 7. `frontend-ux` when applicable
 
 For understanding a repo as a learner, run `codebase-learning-comments.md` instead of the defect-review flow.
+
+For targeted discovery, run `research/research-brief.md`, dispatch source
+agents from `research/source-*.md`, and synthesize with
+`research/research-synthesis.md` before proposing backlog or design changes.
 
 For implementing accepted changes test-first, use `tdd/README.md` to choose the right executable-spec prompt.
 

@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.4.6 - 2026-05-19
+
+- Install targeted research prompts, schemas, and local `make
+  agent-research-*` commands so target repos can create read-only research
+  briefs, source-agent prompts, synthesis artifacts, and task-packet handoffs.
+- Add `scripts/agent_research.py` for manual-mode research runs under
+  `.agent-workflows/runs/` without mutating backlog, docs, ADRs, issues, or
+  source files.
+- Add bounded source-plan fields to generated research briefs so source agents
+  start from seed URLs, exact queries, allowed domains, artifact budgets, and
+  quality floors instead of open-ended search.
+- Refresh the vendored `agent-workflow-kit` prompt snapshot with the research
+  workflow module.
+
+## 0.4.5 - 2026-05-19
+
+- Install `docs/working-rhythm.md` so target repos have a single human-facing
+  guide for the orient, review, scope, and execute flow.
+- Add `make workflow-help` / `make help` to installed target repos, plus a root
+  maintainer Makefile for this kit.
+- Update installer next-step output so new installs start from the working
+  rhythm instead of an undifferentiated command list.
+
 ## 0.4.4 - 2026-05-14
 
 - Add `make agent-task-prepare TASK=<id>` for approved write-capable tasks. The
