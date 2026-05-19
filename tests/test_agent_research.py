@@ -40,6 +40,12 @@ def install_agentic(repo: Path):
         raise AssertionError(result.stderr)
 
 
+def install_minimal(repo: Path):
+    result = run([sys.executable, str(INSTALL), str(repo)], ROOT)
+    if result.returncode != 0:
+        raise AssertionError(result.stderr)
+
+
 def latest_research(repo: Path):
     candidates = sorted(
         path / "research"
@@ -52,6 +58,30 @@ def latest_research(repo: Path):
 
 
 class AgentResearchTests(unittest.TestCase):
+    def test_research_plan_requires_installed_research_prompts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            init_repo(repo)
+            install_minimal(repo)
+
+            result = run(["make", "agent-research-plan"], repo)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Missing prompt file", result.stderr or result.stdout)
+            run_root = repo / ".agent-workflows" / "runs"
+            self.assertFalse(any(run_root.glob("*/research/research-run.json")))
+
+    def test_research_plan_rejects_unknown_source(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            init_repo(repo)
+            install_agentic(repo)
+
+            result = run(["make", "agent-research-plan", "RESEARCH_SOURCES=unknown-source"], repo)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Unknown research source", result.stderr or result.stdout)
+
     def test_research_targets_create_manual_artifacts(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)

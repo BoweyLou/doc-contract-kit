@@ -66,6 +66,8 @@ RESEARCH_SOURCE=github|arxiv|hacker-news|official-docs` to create source-agent
 prompts and source-report templates, then `make agent-research-synthesize` and
 `make agent-research-to-task-packet` to turn accepted evidence into proposed
 backlog, review, design, architecture, ADR, risk, or task-packet handoffs.
+These commands require the research prompts from the `review-prompts` profile.
+If those prompts are missing, the command should fail before writing artifacts.
 
 `make agent-task-prepare TASK=<id> SCOPE=<paths>` creates a write-capable task
 branch and sibling worktree, writes a task packet and receipt template under

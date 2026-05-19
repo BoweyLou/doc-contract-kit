@@ -21,6 +21,7 @@ SOURCE_ALIASES = {
     "official": "official-docs",
     "docs": "official-docs",
 }
+VALID_SOURCES = set(SOURCE_PROMPTS)
 
 SOURCE_DEFAULTS = {
     "github": {
@@ -78,16 +79,23 @@ def write_json(path, payload):
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def read_text(path):
+def read_required_text(root: Path, rel_path: str):
+    path = root / rel_path
     try:
         return path.read_text(encoding="utf-8")
-    except FileNotFoundError:
-        return f"Missing prompt file: {path}\n"
+    except FileNotFoundError as exc:
+        raise SystemExit(
+            f"Missing prompt file: {rel_path}. Install the review-prompts profile or the agentic preset."
+        ) from exc
 
 
 def normalize_source(value):
-    value = (value or "github").strip().lower()
-    return SOURCE_ALIASES.get(value, value)
+    raw = (value or "github").strip().lower()
+    source = SOURCE_ALIASES.get(raw, raw)
+    if source not in VALID_SOURCES:
+        available = ", ".join(sorted(VALID_SOURCES | set(SOURCE_ALIASES)))
+        raise SystemExit(f"Unknown research source: {value}. Available sources: {available}")
+    return source
 
 
 def split_csv(value, default):
@@ -144,6 +152,7 @@ def source_template(source, args):
 
 def plan(args):
     root = repo_root()
+    prompt = read_required_text(root, ".codex/prompts/research/research-brief.md")
     research_dir = unique_run_dir(root) / "research"
     research_dir.mkdir(parents=True)
     sources = [normalize_source(source) for source in split_csv(args.sources, "github,arxiv,hacker-news,official-docs")]
@@ -202,7 +211,6 @@ def plan(args):
 
     write_json(research_dir / "research-brief.template.json", brief)
     write_json(research_dir / "research-run.json", run_payload)
-    prompt = read_text(root / ".codex" / "prompts" / "research" / "research-brief.md")
     (research_dir / "research-brief.prompt.md").write_text(prompt, encoding="utf-8")
     print(f"Research plan written: {research_dir.relative_to(root)}")
     print("Next: make agent-research-run RESEARCH_SOURCE=github")
@@ -242,8 +250,8 @@ def run_source(args):
         "sources_visited": [],
     }
 
-    prompt_rel = SOURCE_PROMPTS.get(source)
-    source_prompt = read_text(root / prompt_rel) if prompt_rel else "No source-specific prompt is installed for this source.\n"
+    prompt_rel = SOURCE_PROMPTS[source]
+    source_prompt = read_required_text(root, prompt_rel)
     brief_rel = (research_dir / "research-brief.template.json").relative_to(root)
     report_rel = (source_dir / "source-report.template.json").relative_to(root)
     prompt_text = f"""# Source Research Dispatch: {source}
@@ -268,6 +276,7 @@ Run boundary:
 def synthesize(args):
     root = repo_root()
     research_dir = latest_research_dir(root)
+    prompt = read_required_text(root, ".codex/prompts/research/research-synthesis.md")
     run_payload = json.loads((research_dir / "research-run.json").read_text(encoding="utf-8"))
     synthesis_dir = research_dir / "synthesis"
     synthesis_dir.mkdir(parents=True, exist_ok=True)
@@ -295,7 +304,6 @@ def synthesize(args):
         "summary": ["Fill this after reading source reports."],
     }
     write_json(synthesis_dir / "research-synthesis.template.json", payload)
-    prompt = read_text(root / ".codex" / "prompts" / "research" / "research-synthesis.md")
     (synthesis_dir / "prompt.md").write_text(prompt, encoding="utf-8")
     print(f"Research synthesis prompt written: {synthesis_dir.relative_to(root) / 'prompt.md'}")
 
@@ -303,10 +311,10 @@ def synthesize(args):
 def to_task_packet(args):
     root = repo_root()
     research_dir = latest_research_dir(root)
+    prompt = read_required_text(root, ".codex/prompts/research/research-to-backlog.md")
+    task_packet = read_required_text(root, ".codex/prompts/task-packet.md")
     handoff_dir = research_dir / "handoff"
     handoff_dir.mkdir(parents=True, exist_ok=True)
-    prompt = read_text(root / ".codex" / "prompts" / "research" / "research-to-backlog.md")
-    task_packet = read_text(root / ".codex" / "prompts" / "task-packet.md")
     synthesis_path = research_dir / "synthesis" / "research-synthesis.template.json"
     handoff = f"""# Research To Task Packet Handoff
 

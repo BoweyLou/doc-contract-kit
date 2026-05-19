@@ -125,6 +125,8 @@ make version-check
 The everyday rhythm is four moves: orient, review, scope, execute. Use
 `make workflow-help` or `docs/working-rhythm.md` in the target repo before
 digging into the lower-level command reference.
+The research commands require the `review-prompts` profile, which is included
+in the `agentic` preset.
 
 ## Start an Agent in an Existing Repo
 
@@ -404,6 +406,10 @@ Installed target repos get Makefile entrypoints:
 - `make agent-review`: point the agent at the multi-agent repo review prompt.
 - `make agent-run-review AGENT=manual|amp`: generate persona review artifacts,
   or execute them through Amp CLI when `AGENT=amp`.
+- `make agent-research-plan`, `make agent-research-run`,
+  `make agent-research-synthesize`, and
+  `make agent-research-to-task-packet`: create read-only targeted-research
+  artifacts when the `review-prompts` profile is installed.
 - `make agent-learn`: point the agent at the learner-focused comment prompt.
 - `make agent-task-packet`: point the agent at the task-packet prompt for
   backlog items, issues, accepted findings, and broad human requests.

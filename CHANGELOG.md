@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.7 - 2026-05-19
+
+- Make research runner commands fail before writing artifacts when the
+  `review-prompts` research prompt files are not installed.
+- Reject unknown research source names instead of producing schema-invalid
+  research briefs.
+- Add regression coverage for minimal installs and invalid research sources.
+
 ## 0.4.6 - 2026-05-19
 
 - Install targeted research prompts, schemas, and local `make
