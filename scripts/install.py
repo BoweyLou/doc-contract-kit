@@ -70,6 +70,7 @@ FILE_MAP = {
 
 CORE_SCRIPTS = [
     "agent_task_prepare.py",
+    "agent_task_status.py",
     "agent_research.py",
     "agent_start.py",
     "agent_review_run.py",

@@ -19,8 +19,11 @@ BASE_REF ?= HEAD
 WORKTREE_ROOT ?=
 OVERLAP ?= warn
 ALLOW_DIRTY ?= 0
+TASK_STATUS_JSON ?= 0
+TASK_STATUS_STRICT ?= 0
+TASK_STATUS_INCLUDE_CLOSED ?= 0
 
-.PHONY: help workflow-help docs-lint docs-build docs-generate docs-check agent-start agent-task-prepare agent-run-review agent-research-plan agent-research-run agent-research-synthesize agent-research-to-task-packet agent-receipt-verify agent-docs-lint agent-docs-localize agent-review agent-learn agent-review-risk agent-task-packet agent-test-first agent-verify kit-status kit-update kit-refresh version-status version-check version-bump
+.PHONY: help workflow-help docs-lint docs-build docs-generate docs-check agent-start agent-task-prepare agent-task-status agent-run-review agent-research-plan agent-research-run agent-research-synthesize agent-research-to-task-packet agent-receipt-verify agent-docs-lint agent-docs-localize agent-review agent-learn agent-review-risk agent-task-packet agent-test-first agent-verify kit-status kit-update kit-refresh version-status version-check version-bump
 
 help: workflow-help
 
@@ -36,6 +39,7 @@ workflow-help:
 		"3. Scope" \
 		"   make agent-task-packet" \
 		"4. Execute" \
+		"   make agent-task-status" \
 		"   make agent-task-prepare TASK=<id> SCOPE=<paths>" \
 		"   make agent-verify" \
 		"" \
@@ -72,6 +76,12 @@ agent-task-prepare:
 		--worktree-root "$(WORKTREE_ROOT)" \
 		--overlap-policy "$(OVERLAP)" \
 		$(if $(filter 1 true yes,$(ALLOW_DIRTY)),--allow-dirty,)
+
+agent-task-status:
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_task_status.py \
+		$(if $(filter 1 true yes,$(TASK_STATUS_JSON)),--json,) \
+		$(if $(filter 1 true yes,$(TASK_STATUS_STRICT)),--strict,) \
+		$(if $(filter 1 true yes,$(TASK_STATUS_INCLUDE_CLOSED)),--include-closed,)
 
 agent-run-review:
 	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/agent_review_run.py --mode "$(MODE)" --agent "$(AGENT)" --amp-command "$(AMP)"

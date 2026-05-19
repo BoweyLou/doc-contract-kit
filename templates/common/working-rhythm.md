@@ -2,10 +2,25 @@
 
 Use this page when the command list feels wider than the workflow.
 
+## Stack Map
+
 This repository has local guardrails installed by `repo-contract-kit`. The
 prompts under `.codex/prompts/` are a vendored snapshot of the companion
 `agent-workflow-kit` prompt library, but normal work should happen from this
 checkout with local commands.
+
+The stack has three layers:
+
+- `agent-workflow-kit` owns canonical prompts, personas, schemas, research
+  workflows, and generated adapter source.
+- `repo-contract-kit` owns installer profiles, managed templates, update
+  behavior, target-repo scripts, and local Make targets.
+- this target repo owns day-to-day work, local docs/version decisions, and any
+  explicit local overrides.
+
+When the prompt source changes, target repos receive it through a vendored
+snapshot in a `repo-contract-kit` update. Target repos do not need to fetch
+`agent-workflow-kit` at runtime.
 
 ## Four Moves
 
@@ -52,13 +67,22 @@ approval state before implementation starts.
 Use this after the task is approved for write-capable work.
 
 ```bash
+make agent-task-status
 make agent-task-prepare TASK=<id> SCOPE=<paths>
 make agent-verify
 ```
 
-`agent-task-prepare` creates a task branch and sibling worktree, writes task
-artifacts, and records local in-flight metadata. The worker edits in the task
-worktree, then validation evidence is captured before handoff.
+`agent-task-status` shows active local tasks, registered git worktrees, dirty
+task worktrees, stale or missing metadata, unknown scopes, and declared scope
+overlaps. `agent-task-prepare` creates a task branch and sibling worktree,
+writes task artifacts, and records local in-flight metadata. The worker edits in
+the task worktree, checks `agent-task-status` before handoff, then validation
+evidence is captured before review.
+
+When using multiple Codex terminals, run the prepare command from the main
+checkout in each terminal, then `cd` into the worktree path printed for that
+task. You keep using the same Codex terminal after the `cd`; the main checkout
+is only the coordination point.
 
 ## Common Paths
 
@@ -82,6 +106,7 @@ For approved implementation:
 
 ```bash
 make agent-task-packet
+make agent-task-status
 make agent-task-prepare TASK=<id> SCOPE=<paths>
 ```
 
@@ -97,3 +122,11 @@ Use `kit-update` when the local kit checkout is already at the version you want.
 Use `kit-refresh` when the first step should be a clean fast-forward pull of the
 kit checkout. Keep kit updates explicit. Normal validation should not update
 installed guardrails automatically.
+
+## Change Routing
+
+| Change | Start in |
+| --- | --- |
+| Prompt wording, personas, schemas, research prompts, TDD prompts, synthesis prompts | `agent-workflow-kit` |
+| Installed commands, templates, scripts, manifests, update behavior, docs-contract checks | `repo-contract-kit` |
+| Target-specific docs, version notes, local overrides, product behavior | this target repo |

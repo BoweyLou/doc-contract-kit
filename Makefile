@@ -9,6 +9,9 @@ workflow-help:
 		"Install into a target repo:" \
 		"   python3 scripts/install.py /path/to/target/repo --preset agentic" \
 		"" \
+		"Cross-repo map:" \
+		"   docs/agent-workflow-stack.md" \
+		"" \
 		"In the installed target repo, use the four-move rhythm:" \
 		"1. Orient" \
 		"   make agent-start" \
@@ -18,6 +21,7 @@ workflow-help:
 		"3. Scope" \
 		"   make agent-task-packet" \
 		"4. Execute" \
+		"   make agent-task-status" \
 		"   make agent-task-prepare TASK=<id> SCOPE=<paths>" \
 		"   make agent-verify" \
 		"" \

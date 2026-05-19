@@ -51,6 +51,7 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((target / "doc-contract.json").exists())
             self.assertTrue((target / "scripts" / "agent_start.py").exists())
             self.assertTrue((target / "scripts" / "agent_task_prepare.py").exists())
+            self.assertTrue((target / "scripts" / "agent_task_status.py").exists())
             self.assertTrue((target / "scripts" / "agent_research.py").exists())
             self.assertTrue((target / "scripts" / "classify_review_risk.py").exists())
             self.assertTrue((target / "scripts" / "check_doc_impact.py").exists())
@@ -223,6 +224,7 @@ class InstallTests(unittest.TestCase):
             self.assertIn("workflow-help:", makefile)
             self.assertIn("agent-start:", makefile)
             self.assertIn("agent-task-prepare:", makefile)
+            self.assertIn("agent-task-status:", makefile)
             self.assertIn("agent-run-review:", makefile)
             self.assertIn("agent-research-plan:", makefile)
             self.assertIn("agent-research-run:", makefile)
@@ -248,6 +250,7 @@ class InstallTests(unittest.TestCase):
                 "help",
                 "workflow-help",
                 "agent-start",
+                "agent-task-status",
                 "agent-run-review",
                 "agent-research-plan",
                 "agent-research-run",

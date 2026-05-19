@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.4.10 - 2026-05-19
+
+- Add installed `make agent-task-status` for checking active task metadata
+  against registered git worktrees before launching or handing off parallel
+  write-capable agents.
+- Report missing, stale, untracked, unknown-scope, and overlapping task
+  coordination hazards, with JSON output and strict-mode failure for local
+  gating.
+- Update installed workflow docs and install tests so target repos expose the
+  parallel task status/check surface.
+
+## 0.4.9 - 2026-05-19
+
+- Add `docs/agent-workflow-stack.md` as the install-layer map for deciding
+  whether a change belongs in `agent-workflow-kit`, `repo-contract-kit`, or an
+  installed target repo.
+- Refresh the installed `docs/working-rhythm.md` template so target repos can
+  understand source kit vs install kit vs target-repo ownership without reading
+  both source repos first.
+- Link the stack map from README, repo-boundary guidance, and maintainer help.
+
 ## 0.4.8 - 2026-05-19
 
 - Add installed `make kit-refresh KIT=/path/to/repo-contract-kit` to

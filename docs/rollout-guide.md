@@ -69,6 +69,11 @@ Use `make agent-task-packet` when a backlog row, issue, accepted finding,
 external planning item, or broad request needs to become one executable unit of
 work before an agent edits files.
 
+Use `make agent-task-status` before launching or handing off parallel
+write-capable tasks. It reads the ignored task registry, compares it to `git
+worktree list`, and reports dirty or missing task worktrees, unknown active
+scopes, untracked task worktrees, and active scope overlaps.
+
 Use `make agent-task-prepare TASK=<id> SCOPE=<paths>` after the task packet is
 approved and before a write-capable worker edits files. It creates a
 `codex/task-...` branch in a sibling worktree, writes local task artifacts, and

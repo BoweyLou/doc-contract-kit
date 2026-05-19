@@ -112,6 +112,79 @@ class AgentTaskPrepareTests(unittest.TestCase):
             self.assertNotEqual(second.returncode, 0)
             self.assertIn("overlaps an in-flight task", second.stderr)
 
+    def test_status_reports_active_task_worktrees_as_json(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            repo.mkdir()
+            init_repo(repo)
+            install_agentic(repo)
+
+            prepare = run(
+                ["make", "agent-task-prepare", "TASK=AGW-061", "SCOPE=scripts/agent_task_prepare.py"],
+                repo,
+            )
+            self.assertEqual(prepare.returncode, 0, prepare.stdout + prepare.stderr)
+
+            result = run(["make", "agent-task-status", "TASK_STATUS_JSON=1"], repo)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report["active_task_count"], 1)
+            self.assertEqual(report["tasks"][0]["task_id"], "AGW-061")
+            self.assertEqual(report["tasks"][0]["scope"], ["scripts/agent_task_prepare.py"])
+            self.assertTrue(report["tasks"][0]["worktree_exists"])
+            self.assertTrue(report["tasks"][0]["worktree_registered"])
+            self.assertFalse(report["tasks"][0]["dirty"])
+            self.assertEqual(report["hazards"], [])
+
+    def test_status_strict_fails_on_active_scope_overlap(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            repo.mkdir()
+            init_repo(repo)
+            install_agentic(repo)
+
+            first = run(["make", "agent-task-prepare", "TASK=AGW-061", "SCOPE=scripts"], repo)
+            self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+            second = run(
+                ["make", "agent-task-prepare", "TASK=AGW-062", "SCOPE=scripts/agent_task_prepare.py", "OVERLAP=ignore"],
+                repo,
+            )
+            self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
+
+            result = run(["make", "agent-task-status", "TASK_STATUS_STRICT=1"], repo)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Strict mode failures", result.stdout)
+            self.assertIn("AGW-061:scripts overlaps AGW-062:scripts/agent_task_prepare.py", result.stdout)
+
+    def test_status_strict_fails_on_missing_task_worktree(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            repo.mkdir()
+            init_repo(repo)
+            install_agentic(repo)
+            task_dir = repo / ".agent-workflows" / "tasks"
+            task_dir.mkdir(parents=True, exist_ok=True)
+            (task_dir / "agw-063.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "task_id": "AGW-063",
+                        "status": "in-progress",
+                        "worktree": str(Path(tmp) / "missing-worktree"),
+                        "scope": ["docs"],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = run(["make", "agent-task-status", "TASK_STATUS_STRICT=1"], repo)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("AGW-063", result.stdout)
+            self.assertIn("worktree path is missing", result.stdout)
+
     def test_prepare_requires_clean_main_checkout_by_default(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp) / "repo"

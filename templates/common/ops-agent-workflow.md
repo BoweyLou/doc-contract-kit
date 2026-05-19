@@ -75,12 +75,26 @@ backlog, review, design, architecture, ADR, risk, or task-packet handoffs.
 These commands require the research prompts from the `review-prompts` profile.
 If those prompts are missing, the command should fail before writing artifacts.
 
+`make agent-task-status` shows the active local task registry, registered git
+worktrees, dirty task worktrees, missing or stale task metadata, unknown scopes,
+and declared scope overlaps. Run it before starting a new write-capable task and
+again before handoff so each worker has the current parallel-job picture. Set
+`TASK_STATUS_STRICT=1` to fail on coordination hazards such as missing
+worktrees, unknown active scopes, untracked task worktrees, or overlapping
+active scopes.
+
 `make agent-task-prepare TASK=<id> SCOPE=<paths>` creates a write-capable task
 branch and sibling worktree, writes a task packet and receipt template under
 `.agent-workflows/tasks/` in that worktree, and records local in-flight metadata
 under `.agent-workflows/tasks/` in the main checkout. It refuses a dirty main
 checkout by default. Set `OVERLAP=block` to stop when declared scope overlaps
 another active task, or keep the default `OVERLAP=warn` while triaging.
+
+For Codex desktop or terminal use, run `agent-task-prepare` from the main
+checkout, then change into the printed worktree path in the same terminal. For
+parallel work, repeat that from another terminal with a different task id and
+scope. After setup, agents edit only their task worktrees; the main checkout is
+used for `agent-task-status` and coordination checks.
 
 `make agent-receipt-verify` validates the latest local review receipt in strict
 mode. Set `RECEIPT=path/to/receipt.json` to validate a specific run. Strict mode
@@ -108,7 +122,8 @@ only when the accepted change needs a target repo version bump.
 - `.agent-workflows/instruction-budgets.json` contains warning-only size and
   rule-count budgets for agent-facing instruction files.
 - `.agent-workflows/tasks/` contains ignored local in-flight task metadata for
-  worktree-per-task write workers.
+  worktree-per-task write workers. `make agent-task-status` reads this registry
+  and compares it to `git worktree list`.
 - `.codex/prompts/` contains reusable prompts. The files can be read by other
   agents or used manually; they are not limited to Codex.
 - `schemas/research-brief.schema.json`,

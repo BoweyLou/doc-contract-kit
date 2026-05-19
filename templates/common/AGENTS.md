@@ -96,6 +96,11 @@ creates a sibling worktree under a task branch with the normal Codex branch
 prefix, records local in-flight metadata under `.agent-workflows/tasks/`, and
 warns when declared scope overlaps another active task.
 
+Use `make agent-task-status` before launching or handing off parallel
+write-capable tasks. It compares the local task registry with `git worktree
+list`, reports dirty or missing task worktrees, and surfaces unknown or
+overlapping active scopes.
+
 ## Instruction hygiene
 
 Keep `AGENTS.md` as a short route map. Put detailed rules in scoped contracts,

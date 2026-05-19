@@ -49,6 +49,11 @@ The companion workflow layer is
 owns the prompt library, reviewer personas, learning-comments workflows, TDD
 prompts, synthesis prompts, and research backlog.
 
+For the cross-repo ownership map, read
+[`docs/agent-workflow-stack.md`](docs/agent-workflow-stack.md). It explains
+which repo to edit for prompt/source changes, installer changes, target-repo
+operator guidance, and release pairing.
+
 ## Core idea
 
 A code change is not complete until the repository has either:
@@ -428,6 +433,9 @@ Installed target repos get Makefile entrypoints:
 - `make agent-learn`: point the agent at the learner-focused comment prompt.
 - `make agent-task-packet`: point the agent at the task-packet prompt for
   backlog items, issues, accepted findings, and broad human requests.
+- `make agent-task-status`: show active local task metadata, registered
+  worktrees, dirty or missing task worktrees, unknown scopes, and active scope
+  overlaps. Use `TASK_STATUS_STRICT=1` to fail on coordination hazards.
 - `make agent-task-prepare TASK=<id> SCOPE=<paths>`: create a
   worktree-per-task branch, local task packet, receipt template, and in-flight
   metadata for an approved write-capable task.
