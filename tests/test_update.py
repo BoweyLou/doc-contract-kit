@@ -45,6 +45,12 @@ def install_agentic(repo: Path):
         raise AssertionError(result.stderr)
 
 
+def clone_local_kit(tmp_root: Path):
+    kit = tmp_root / "repo-contract-kit"
+    run(["git", "clone", "-q", str(ROOT), str(kit)], ROOT, check=True)
+    return kit
+
+
 def manifest_path(repo: Path):
     return repo / ".doc-contract-kit" / "manifest.json"
 
@@ -159,6 +165,36 @@ class UpdateTests(unittest.TestCase):
             self.assertEqual((repo / "AGENTS.md").read_text(encoding="utf-8"), "# Old managed agents\n")
             self.assertFalse(list((repo / ".doc-contract-kit" / "updates").glob("*/update-report.json")))
             self.assertIn('"dry_run": true', result.stdout)
+
+    def test_kit_refresh_refuses_dirty_kit_checkout(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            repo = tmp_root / "target"
+            repo.mkdir()
+            init_repo(repo)
+            install_agentic(repo)
+            kit = clone_local_kit(tmp_root)
+            (kit / "DIRTY.txt").write_text("dirty\n", encoding="utf-8")
+
+            result = run(["make", "kit-refresh", f"KIT={kit}"], repo)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Kit checkout has local changes", result.stderr + result.stdout)
+
+    def test_kit_refresh_pulls_status_and_updates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            repo = tmp_root / "target"
+            repo.mkdir()
+            init_repo(repo)
+            install_agentic(repo)
+            kit = clone_local_kit(tmp_root)
+
+            result = run(["make", "kit-refresh", f"KIT={kit}"], repo)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("repo-contract-kit installed version:", result.stdout)
+            self.assertIn("Update complete.", result.stdout)
 
 
 if __name__ == "__main__":

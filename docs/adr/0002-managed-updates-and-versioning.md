@@ -28,6 +28,7 @@ Target repositories get local update entrypoints:
 - `make kit-status`
 - `make kit-status KIT=/path/to/repo-contract-kit`
 - `make kit-update KIT=/path/to/repo-contract-kit`
+- `make kit-refresh KIT=/path/to/repo-contract-kit`
 
 When `KIT` is supplied, `kit-status` compares the installed kit and prompt
 snapshot against the local checkout and reports whether an update is current or
@@ -37,6 +38,10 @@ Updates only overwrite a managed file when the current target file still matches
 the last installed hash. If a file was customized, the updater preserves it and
 writes a proposed replacement plus a conflict report under
 `.doc-contract-kit/updates/`.
+
+`kit-refresh` is a convenience wrapper for local kit checkouts. It refuses dirty
+kit working trees, runs a fast-forward-only pull, prints the post-pull status,
+and then delegates to the same conservative updater.
 
 Agentic installs include a `versioning` profile. That profile creates
 `VERSION`, `CHANGELOG.md`, `docs/versioning.md`, and local version commands when

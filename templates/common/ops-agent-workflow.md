@@ -55,6 +55,12 @@ from a newer local checkout. Clean managed files are replaced. Customized manage
 files are preserved and proposed replacements are written under
 `.doc-contract-kit/updates/`.
 
+`make kit-refresh KIT=/path/to/repo-contract-kit` first verifies that the local
+kit checkout is clean, runs `git pull --ff-only`, prints the refreshed
+`kit-status`, and then runs the same safe managed update. Use `kit-update`
+directly when the user explicitly wants to install from an unpushed local kit
+checkout.
+
 `make agent-task-packet` points the agent at the task-packet prompt. Use it when
 a backlog row, issue, accepted review finding, external planning item, or broad
 human request needs to become scoped executable work before implementation

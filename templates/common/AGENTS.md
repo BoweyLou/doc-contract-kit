@@ -82,8 +82,10 @@ cleanliness, and target repo version. Use
 `make kit-status KIT=/path/to/repo-contract-kit` when a local kit checkout is
 available and you need a `current`/`available` update signal. Use
 `make kit-update KIT=/path/to/repo-contract-kit` only when the user asks to
-refresh the local kit files. Customized managed files must be preserved; review
-proposed replacements under `.doc-contract-kit/updates/`.
+refresh the local kit files from that checkout, or
+`make kit-refresh KIT=/path/to/repo-contract-kit` when the user wants to pull a
+clean local kit checkout first and then update. Customized managed files must be
+preserved; review proposed replacements under `.doc-contract-kit/updates/`.
 
 Use the review-risk tier from `make agent-start` to choose the smallest safe
 reviewer set. High-risk or critical changes should stay read-only until a human

@@ -411,7 +411,7 @@ def kit_context(root):
             "managed_file_count": 0,
             "target_owned_file_count": 0,
             "recent_update_reports": update_reports,
-            "update_command": "make kit-status && make kit-update KIT=/path/to/repo-contract-kit",
+            "update_command": "make kit-refresh KIT=/path/to/repo-contract-kit",
         }
 
     files = manifest.get("files", []) if isinstance(manifest, dict) else []
@@ -429,7 +429,7 @@ def kit_context(root):
         "managed_file_count": sum(1 for item in files if isinstance(item, dict) and item.get("managed")),
         "target_owned_file_count": sum(1 for item in files if isinstance(item, dict) and item.get("owner") == "target"),
         "recent_update_reports": update_reports,
-        "update_command": "make kit-status && make kit-update KIT=/path/to/repo-contract-kit",
+        "update_command": "make kit-refresh KIT=/path/to/repo-contract-kit",
     }
 
 

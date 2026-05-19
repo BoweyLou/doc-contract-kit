@@ -231,6 +231,7 @@ class InstallTests(unittest.TestCase):
             self.assertIn("agent-receipt-verify:", makefile)
             self.assertIn("kit-status:", makefile)
             self.assertIn("kit-update:", makefile)
+            self.assertIn("kit-refresh:", makefile)
             self.assertIn("agent-review:", makefile)
             self.assertIn("agent-learn:", makefile)
             self.assertIn("agent-review-risk:", makefile)

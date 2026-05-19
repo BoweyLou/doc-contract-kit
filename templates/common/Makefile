@@ -20,7 +20,7 @@ WORKTREE_ROOT ?=
 OVERLAP ?= warn
 ALLOW_DIRTY ?= 0
 
-.PHONY: help workflow-help docs-lint docs-build docs-generate docs-check agent-start agent-task-prepare agent-run-review agent-research-plan agent-research-run agent-research-synthesize agent-research-to-task-packet agent-receipt-verify agent-docs-lint agent-docs-localize agent-review agent-learn agent-review-risk agent-task-packet agent-test-first agent-verify kit-status kit-update version-status version-check version-bump
+.PHONY: help workflow-help docs-lint docs-build docs-generate docs-check agent-start agent-task-prepare agent-run-review agent-research-plan agent-research-run agent-research-synthesize agent-research-to-task-packet agent-receipt-verify agent-docs-lint agent-docs-localize agent-review agent-learn agent-review-risk agent-task-packet agent-test-first agent-verify kit-status kit-update kit-refresh version-status version-check version-bump
 
 help: workflow-help
 
@@ -114,6 +114,15 @@ kit-status:
 
 kit-update:
 	@test -n "$(KIT)" || (echo "Set KIT=/path/to/repo-contract-kit"; exit 1)
+	@PYTHONDONTWRITEBYTECODE=1 python3 "$(KIT)/scripts/update.py" "$(CURDIR)"
+
+kit-refresh:
+	@test -n "$(KIT)" || (echo "Set KIT=/path/to/repo-contract-kit"; exit 1)
+	@git -C "$(KIT)" rev-parse --is-inside-work-tree >/dev/null 2>&1 || (echo "KIT is not a git checkout: $(KIT)"; exit 1)
+	@test -f "$(KIT)/scripts/update.py" || (echo "KIT does not look like repo-contract-kit: $(KIT)"; exit 1)
+	@test -z "$$(git -C "$(KIT)" status --porcelain)" || (echo "Kit checkout has local changes; commit, stash, or use kit-update explicitly: $(KIT)"; exit 1)
+	@git -C "$(KIT)" pull --ff-only
+	@PYTHONDONTWRITEBYTECODE=1 python3 scripts/kit_status.py --kit "$(KIT)"
 	@PYTHONDONTWRITEBYTECODE=1 python3 "$(KIT)/scripts/update.py" "$(CURDIR)"
 
 version-status:

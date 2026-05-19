@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.8 - 2026-05-19
+
+- Add installed `make kit-refresh KIT=/path/to/repo-contract-kit` to
+  fast-forward pull a clean local kit checkout before running the safe managed
+  update.
+- Update installed workflow docs, rollout guidance, ADR coverage, and startup
+  packet update guidance for the refresh command.
+- Add regression coverage for clean and dirty `kit-refresh` paths.
+
 ## 0.4.7 - 2026-05-19
 
 - Make research runner commands fail before writing artifacts when the

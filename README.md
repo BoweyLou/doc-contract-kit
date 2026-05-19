@@ -105,6 +105,7 @@ Then inside the target repo:
 make workflow-help
 make agent-start
 make kit-status
+make kit-refresh KIT=/path/to/repo-contract-kit
 make docs-check
 make agent-docs-lint
 make agent-docs-localize
@@ -234,6 +235,18 @@ The updater is safe by default. It overwrites a kit-managed file only when the
 target file still matches the last installed hash. If the target file was
 customized, it is preserved and a proposed replacement plus report is written
 under `.doc-contract-kit/updates/`.
+
+To refresh the local kit checkout first and then run the safe update:
+
+```bash
+make kit-refresh KIT=/path/to/repo-contract-kit
+```
+
+`kit-refresh` verifies that `KIT` is a clean git checkout, runs
+`git pull --ff-only`, prints `kit-status` with the refreshed checkout, and then
+runs `kit-update`. If the kit checkout has local changes, commit or stash them
+first, or run `kit-update` explicitly when you intentionally want to use that
+local working tree.
 
 For internet-enabled repos that do not keep the kit cloned:
 
@@ -397,6 +410,8 @@ Installed target repos get Makefile entrypoints:
   available.
 - `make kit-update KIT=/path/to/repo-contract-kit`: safely update managed files
   from a newer local kit checkout.
+- `make kit-refresh KIT=/path/to/repo-contract-kit`: fast-forward pull a clean
+  local kit checkout, show update status, then run the safe managed update.
 - `make docs-check`: run the documentation contract checks.
 - `make agent-docs-lint`: check local agent instruction files for hidden
   Unicode, stale paths, unsafe references, contradictions, and instruction

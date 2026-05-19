@@ -90,7 +90,10 @@ For kit maintenance:
 ```bash
 make kit-status KIT=/path/to/repo-contract-kit
 make kit-update KIT=/path/to/repo-contract-kit
+make kit-refresh KIT=/path/to/repo-contract-kit
 ```
 
-Keep kit updates explicit. Normal validation should not update installed
-guardrails automatically.
+Use `kit-update` when the local kit checkout is already at the version you want.
+Use `kit-refresh` when the first step should be a clean fast-forward pull of the
+kit checkout. Keep kit updates explicit. Normal validation should not update
+installed guardrails automatically.

@@ -29,6 +29,7 @@ After install, use these target-repo commands:
 - `make kit-status`
 - `make kit-status KIT=/path/to/repo-contract-kit`
 - `make kit-update KIT=/path/to/repo-contract-kit`
+- `make kit-refresh KIT=/path/to/repo-contract-kit`
 - `make docs-check`
 - `make agent-docs-lint`
 - `make agent-docs-localize`
@@ -87,6 +88,11 @@ checkout. Clean managed files are updated automatically. Customized files are
 preserved, and proposed replacements are written under
 `.doc-contract-kit/updates/` for review. If the repo is a legacy install without
 a manifest, the first run adopts current hashes without overwriting files.
+
+Use `make kit-refresh KIT=/path/to/repo-contract-kit` when that local kit
+checkout should be refreshed from git first. It refuses dirty kit checkouts,
+runs `git pull --ff-only`, prints `kit-status` against the refreshed checkout,
+and then runs `kit-update`.
 
 The `agentic` preset includes the `versioning` profile. That profile creates
 local SemVer files when missing and keeps `VERSION` and

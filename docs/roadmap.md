@@ -47,5 +47,6 @@ covers the broader local repository contract for agentic development.
 ## v0.4
 
 - richer upgrade paths
+- target-repo `kit-refresh` command for clean local checkout pull plus safe update
 - repo scoring/freshness heuristics
 - optional CI adapters for teams that can use them
